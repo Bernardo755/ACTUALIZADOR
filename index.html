@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>App de Trámites</title>
+  <!-- SheetJS para leer y exportar Excel localmente -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
+    .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    h2, h3 { color: #2c3e50; }
+    
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+    .tab-btn { padding: 10px 15px; border: none; background: #eee; cursor: pointer; border-radius: 4px; font-weight: bold; }
+    .tab-btn.activo { background: #3498db; color: white; }
+    
+    .modulo { display: none; }
+    .modulo.activo { display: block; }
+    
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555;}
+    input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; text-transform: uppercase; }
+    
+    .btn { padding: 10px 15px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    .btn:disabled { background: #95a5a6; cursor: not-allowed; }
+    .btn-secondary { background: #34495e; }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
+    th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
+    th { background-color: #34495e; color: white; }
+    
+    .loader { display: none; color: #e67e22; font-weight: bold; margin-top: 10px; }
+    .aviso-fila { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; border-left: 4px solid #ffeeba;}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Gestor de Trámites de Base de Datos</h2>
+  
+  <div class="tabs">
+    <button class="tab-btn activo" onclick="cambiarModulo('modulo1-form')">Mod 1: Formulario Nuevos</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo1-excel')">Mod 1: Excel Nuevos</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo2')">Mod 2: Actualización Estatus</button>
+  </div>
+
+  <!-- MÓDULO 1: FORMULARIO -->
+  <div id="modulo1-form" class="modulo activo">
+    <h3>Registro Manual de Tarjetas</h3>
+    <div class="aviso-fila">Cargando celda de destino...</div>
+    
+    <div class="form-grid" id="formularioNuevos">
+      <div class="form-group"><label>Folio (Col A)</label><input type="text" id="m1_folio"></div>
+      <div class="form-group"><label>ID SARE (Col B)</label><input type="text" id="m1_idSare"></div>
+      <div class="form-group"><label>Nombre SARE (Col C)</label><input type="text" id="m1_nombreSare"></div>
+      <div class="form-group"><label>Municipio (Col D)</label><input type="text" id="m1_municipio"></div>
+      <div class="form-group"><label>CCT (Col F)</label><input type="text" id="m1_cct"></div>
+      <div class="form-group"><label>Nombre Escuela (Col G)</label><input type="text" id="m1_escuela"></div>
+      <div class="form-group"><label>ID Becario/Fam (Col H)</label><input type="text" id="m1_idFamilia"></div>
+      <div class="form-group"><label>Nombre (Col I)</label><input type="text" id="m1_nombre"></div>
+      <div class="form-group"><label>Primer Apellido (Col J)</label><input type="text" id="m1_ap1"></div>
+      <div class="form-group"><label>Segundo Apellido (Col K)</label><input type="text" id="m1_ap2"></div>
+      <div class="form-group"><label>Remesa (Col L)</label><input type="text" id="m1_remesa"></div>
+      <div class="form-group">
+        <label>Programa (Col M)</label>
+        <select id="m1_programa">
+          <option value="BASICA">BASICA</option><option value="BUEMS">BUEMS</option><option value="JEF">JEF</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Bloque (Col N)</label><input type="text" id="m1_bloque"></div>
+      <div class="form-group">
+        <label>OBS (Col P)</label>
+        <input type="text" id="m1_obs" list="opcionesObs">
+        <datalist id="opcionesObs">
+          <option value="RECIBIDA DE OTRO ESTADO"></option>
+          <option value="NUEVA REMESA RECIBIDA"></option>
+        </datalist>
+      </div>
+      <div class="form-group"><label>Mes de Remesa (Col Q)</label><input type="text" id="m1_mes"></div>
+      <div class="form-group"><label>CURP (Col R)</label><input type="text" id="m1_curp" maxlength="18"></div>
+      <div class="form-group">
+        <label>Estatus (Col S)</label>
+        <select id="m1_estatus">
+          <option value="PERTENECE A LA SARE 1301">PERTENECE A LA SARE 1301</option>
+          <option value="PERTENECE A LA SARE 1302">PERTENECE A LA SARE 1302</option>
+          <option value="PERTENECE A LA SARE 1303">PERTENECE A LA SARE 1303</option>
+          <option value="PERTENECE A LA SARE 1304">PERTENECE A LA SARE 1304</option>
+          <option value="PERTENECE A LA SARE 1305">PERTENECE A LA SARE 1305</option>
+          <option value="PERTENECE A LA SARE 1306">PERTENECE A LA SARE 1306</option>
+          <option value="PERTENECE A LA SARE 1307">PERTENECE A LA SARE 1307</option>
+        </select>
+      </div>
+    </div>
+    
+    <button class="btn btn-secondary" onclick="agregarAlBloque()">➕ Agregar al Bloque</button>
+    <button class="btn" id="btnEnviarBloque" onclick="enviarBloque()" style="display:none;">☁️ Sincronizar Bloque</button>
+    <div id="loaderForm" class="loader">⏳ Sincronizando datos...</div>
+
+    <table id="tablaBloque" style="display:none;">
+      <thead>
+        <tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo (Auto)</th><th>Estatus</th></tr>
+      </thead>
+      <tbody id="tbodyBloque"></tbody>
+    </table>
+  </div>
+
+  <!-- MÓDULO 1: EXCEL NUEVOS -->
+  <div id="modulo1-excel" class="modulo">
+    <h3>Carga Masiva de Tarjetas Nuevas (Excel)</h3>
+    <div class="aviso-fila">Cargando celda de destino...</div>
+    <input type="file" id="archivoMod1" accept=".xlsx, .xls">
+    <button class="btn" onclick="procesarExcelNuevos()">📤 Sincronizar Excel</button>
+    <div id="loaderExcelNuevos" class="loader">⏳ Procesando y sincronizando archivo...</div>
+  </div>
+
+  <!-- MÓDULO 2: ACTUALIZACIÓN ESTATUS -->
+  <div id="modulo2" class="modulo">
+    <h3>Actualización Masiva de Estatus</h3>
+    <input type="file" id="archivoMod2" accept=".xlsx, .xls">
+    <button class="btn" onclick="procesarExcelUpdate()">🔄 Sincronizar y Actualizar</button>
+    <div id="loaderMod2" class="loader">⏳ Buscando y sincronizando, no cierres la ventana...</div>
+    
+    <div id="resMod2" style="margin-top: 20px; font-weight: bold;"></div>
+    <button id="btnDescargarReporte" class="btn btn-secondary" style="display:none;">📥 Descargar Reporte</button>
+  </div>
+
+</div>
+
+<!-- SCRIPT DE LOGICA -->
+<script>
+  // =========================================================================
+  // 🔴 AQUÍ VA LA URL DEL DEPLOY DE TU GOOGLE APPS SCRIPT
+  // =========================================================================
+  const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbytEY6RgiKHt2NNgXdCb3HlssSVWThGhsEeJSOiBMAtl_3VRaTdcUBLAOn3mZGjbuYJaQ/exec';
+
+  let bloqueActual = []; 
+  let reporteMasivoGenerado = []; 
+  let filaSiguienteGlobal = 0;
+
+  // UTILIDAD: Función unificada para conectarse al backend (Apps Script)
+  async function llamarBackend(accion, payload = null) {
+    try {
+      const response = await fetch(URL_BACKEND_GAS, {
+        method: 'POST',
+        // text/plain es OBLIGATORIO para evitar bloqueos CORS con Google Apps Script
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ accion: accion, payload: payload })
+      });
+      return await response.json();
+    } catch (error) {
+      return { exito: false, error: 'Fallo la conexión con el servidor: ' + error.message };
+    }
+  }
+
+  // Fuerza mayúsculas en el front
+  document.addEventListener('input', function(e) {
+    if(e.target.tagName === 'INPUT' && e.target.type === 'text') {
+      e.target.value = e.target.value.toUpperCase();
+    }
+  });
+
+  // Pestañas
+  function cambiarModulo(id) {
+    document.querySelectorAll('.modulo').forEach(m => m.classList.remove('activo'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+    document.getElementById(id).classList.add('activo');
+    event.currentTarget.classList.add('activo');
+    
+    if(id.includes('modulo1')) consultarSiguienteFila();
+  }
+
+  // Traer celda vacía de destino
+  async function consultarSiguienteFila() {
+    document.querySelectorAll('.aviso-fila').forEach(el => el.innerText = "Consultando en vivo la celda vacía...");
+    const res = await llamarBackend('obtenerSiguienteFila');
+    
+    if(res.exito) {
+      filaSiguienteGlobal = res.fila;
+      document.querySelectorAll('.aviso-fila').forEach(el => {
+        el.innerText = `🟢 Seguro: La información se vaciará a partir de la celda A${res.fila}. Nada será sobreescrito.`;
+      });
+    }
+  }
+  
+  window.onload = consultarSiguienteFila;
+
+  // ---- MÓDULO 1: FORMULARIO ----
+  function agregarAlBloque() {
+    const n = document.getElementById("m1_nombre").value;
+    const ap1 = document.getElementById("m1_ap1").value;
+    const ap2 = document.getElementById("m1_ap2").value;
+    const nombreCompleto = `${n} ${ap1} ${ap2}`.trim();
+    
+    const fechaActual = new Date().toLocaleDateString('es-MX');
+    let obs = document.getElementById("m1_obs").value;
+    obs = obs ? `${obs} - ${fechaActual}` : fechaActual;
+
+    let filaNueva = new Array(20).fill("");
+    filaNueva[0]  = document.getElementById("m1_folio").value;
+    filaNueva[1]  = document.getElementById("m1_idSare").value;
+    filaNueva[2]  = document.getElementById("m1_nombreSare").value;
+    filaNueva[3]  = document.getElementById("m1_municipio").value;
+    filaNueva[5]  = document.getElementById("m1_cct").value;
+    filaNueva[6]  = document.getElementById("m1_escuela").value;
+    filaNueva[7]  = document.getElementById("m1_idFamilia").value;
+    filaNueva[8]  = n;
+    filaNueva[9]  = ap1;
+    filaNueva[10] = ap2;
+    filaNueva[11] = document.getElementById("m1_remesa").value;
+    filaNueva[12] = document.getElementById("m1_programa").value;
+    filaNueva[13] = document.getElementById("m1_bloque").value;
+    filaNueva[15] = obs;
+    filaNueva[16] = document.getElementById("m1_mes").value;
+    filaNueva[17] = document.getElementById("m1_curp").value;
+    filaNueva[18] = document.getElementById("m1_estatus").value;
+    filaNueva[19] = nombreCompleto;
+
+    bloqueActual.push(filaNueva);
+
+    document.getElementById("tbodyBloque").innerHTML += `<tr>
+      <td>${filaNueva[0]}</td><td>${filaNueva[5]}</td><td>${filaNueva[7]}</td>
+      <td>${filaNueva[19]}</td><td>${filaNueva[18]}</td>
+    </tr>`;
+    
+    document.getElementById("tablaBloque").style.display = "table";
+    document.getElementById("btnEnviarBloque").style.display = "inline-block";
+    document.querySelectorAll('#formularioNuevos input').forEach(inp => inp.value = "");
+  }
+
+  async function enviarBloque() {
+    if(bloqueActual.length === 0) return;
+    if(!confirm(`Se enviará un bloque de ${bloqueActual.length} registros (Desde fila ${filaSiguienteGlobal}). ¿Continuar?`)) return;
+    
+    document.getElementById("loaderForm").style.display = "block";
+    document.getElementById("btnEnviarBloque").disabled = true;
+
+    const res = await llamarBackend('registrarBloqueTarjetas', bloqueActual);
+    
+    document.getElementById("loaderForm").style.display = "none";
+    document.getElementById("btnEnviarBloque").disabled = false;
+    
+    if(res.exito) {
+      alert("✅ " + res.mensaje);
+      bloqueActual = [];
+      document.getElementById("tbodyBloque").innerHTML = "";
+      document.getElementById("tablaBloque").style.display = "none";
+      document.getElementById("btnEnviarBloque").style.display = "none";
+      consultarSiguienteFila();
+    } else {
+      alert("❌ Error: " + res.error);
+    }
+  }
+
+  // ---- MÓDULO 1: EXCEL NUEVOS ----
+  function procesarExcelNuevos() {
+    const file = document.getElementById('archivoMod1').files[0];
+    if(!file) return alert("Sube un archivo Excel primero.");
+    if(!confirm(`Se anexará a partir de la Fila ${filaSiguienteGlobal}. ¿Continuar?`)) return;
+
+    document.getElementById("loaderExcelNuevos").style.display = "block";
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const jsonArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+      
+      let bloqueExcel = [];
+      const fechaActual = new Date().toLocaleDateString('es-MX');
+
+      for(let i = 1; i < jsonArr.length; i++) { // Salta fila 0 (encabezados)
+        let row = jsonArr[i];
+        if(!row[0]) continue; 
+
+        let fData = new Array(20).fill("");
+        let n = String(row[8]||"").toUpperCase();
+        let ap1 = String(row[9]||"").toUpperCase();
+        let ap2 = String(row[10]||"").toUpperCase();
+        
+        let obsOrig = String(row[15]||"").toUpperCase();
+        fData[0] = String(row[0]||"").toUpperCase();
+        fData[1] = String(row[1]||"").toUpperCase();
+        fData[2] = String(row[2]||"").toUpperCase();
+        fData[3] = String(row[3]||"").toUpperCase();
+        fData[5] = String(row[5]||"").toUpperCase();
+        fData[6] = String(row[6]||"").toUpperCase();
+        fData[7] = String(row[7]||"").toUpperCase();
+        fData[8] = n; fData[9] = ap1; fData[10]= ap2;
+        fData[11]= String(row[11]||"").toUpperCase();
+        fData[12]= String(row[12]||"").toUpperCase();
+        fData[13]= String(row[13]||"").toUpperCase();
+        fData[15]= obsOrig ? `${obsOrig} - ${fechaActual}` : fechaActual;
+        fData[16]= String(row[16]||"").toUpperCase();
+        fData[17]= String(row[17]||"").toUpperCase();
+        fData[18]= String(row[18]||"").toUpperCase();
+        fData[19]= `${n} ${ap1} ${ap2}`.trim();
+
+        bloqueExcel.push(fData);
+      }
+
+      const res = await llamarBackend('registrarBloqueTarjetas', bloqueExcel);
+      document.getElementById("loaderExcelNuevos").style.display = "none";
+      
+      if(res.exito){
+        alert("✅ " + res.mensaje);
+        consultarSiguienteFila();
+      } else {
+        alert("❌ Error: " + res.error);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ---- MÓDULO 2: ACTUALIZACIÓN ESTATUS ----
+  function procesarExcelUpdate() {
+    const file = document.getElementById('archivoMod2').files[0];
+    if(!file) return alert("Sube un archivo Excel primero.");
+
+    document.getElementById("loaderMod2").style.display = "block";
+    document.getElementById("btnDescargarReporte").style.display = "none";
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, {type: 'array'});
+      const jsonArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+      
+      let arrayUpdates = [];
+      for(let i = 1; i < jsonArr.length; i++) {
+        let row = jsonArr[i];
+        if(!row[0]) continue; 
+        arrayUpdates.push({
+          folio: String(row[0]).toUpperCase(),
+          estatus: String(row[1]||"").toUpperCase(),
+          obs: String(row[2]||"").toUpperCase()
+        });
+      }
+
+      const res = await llamarBackend('procesarActualizacionMasiva', arrayUpdates);
+      document.getElementById("loaderMod2").style.display = "none";
+      
+      if(res.exito) {
+        alert(`✅ Sincronización Concluida.\nÉxitos: ${res.estadisticas.exitos}\nFallos: ${res.estadisticas.fallos}`);
+        document.getElementById("resMod2").innerHTML = 
+          `Resultados: <span style="color:green">${res.estadisticas.exitos} Actualizados</span> | 
+          <span style="color:red">${res.estadisticas.fallos} No Encontrados</span>`;
+        
+        reporteMasivoGenerado = res.reporte;
+        document.getElementById("btnDescargarReporte").style.display = "inline-block";
+      } else {
+        alert("❌ Error: " + res.error);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function generarReporteExcel() {
+    if(reporteMasivoGenerado.length === 0) return;
+    const dataFinal = [["FOLIO BUSCADO", "ESTATUS ENVIADO", "OBS ENVIADO", "RESULTADO SISTEMA"], ...reporteMasivoGenerado];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataFinal), "Reporte");
+    XLSX.writeFile(wb, "Reporte_Actualizacion.xlsx");
+  }
+</script>
+
+</body>
+</html>
