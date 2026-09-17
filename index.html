@@ -4,20 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>App de Trámites</title>
-  <!-- Mantenemos la librería por si quieres descargar el reporte en Excel real al final -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
-      /* NUEVO COLOR SOLICITADO */
-      --primary: #002F2A; 
-      --primary-hover: #004d45; 
-      --secondary: #64748b; --secondary-hover: #475569;
-      --success: #10b981; --success-hover: #059669;
-      --bg-color: #f8fafc; --surface: #ffffff;
-      --text-main: #0f172a; --text-muted: #475569;
-      --border: #e2e8f0; --radius: 12px;
+      --primary: #002F2A; --primary-hover: #014a42;
+      --secondary: #526b67; --secondary-hover: #3a4f4c;
+      --success: #0d9488; --success-hover: #0f766e;
+      --bg-color: #f2f6f5; --surface: #ffffff;
+      --text-main: #0b201d; --text-muted: #526b67;
+      --border: #d9e3e1; --radius: 12px;
     }
 
     body {
@@ -30,41 +27,41 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1000px;
       margin: 0 auto;
       background: var(--surface);
       padding: 30px;
       border-radius: var(--radius);
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px -1px rgba(0, 47, 42, 0.1), 0 2px 4px -1px rgba(0, 47, 42, 0.06);
     }
 
     h2 { margin-top: 0; color: var(--primary); font-weight: 700; text-align: center; margin-bottom: 25px; }
-    h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 10px; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-    p.instrucciones { font-size: 14px; color: var(--text-muted); margin-bottom: 15px; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
 
     /* Tabs */
     .tabs { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; }
     .tab-btn {
       padding: 12px 20px; border: none; background: var(--bg-color); color: var(--text-muted);
       cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s;
+      white-space: nowrap;
     }
-    .tab-btn:hover { background: #e2e8f0; }
-    .tab-btn.activo { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(0,47,42,0.2); }
-    
+    .tab-btn:hover { background: #e2eceb; }
+    .tab-btn.activo { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(0,47,42,0.25); }
+
     .modulo { display: none; animation: fadeIn 0.3s; }
     .modulo.activo { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    
-    /* Formulario Manual */
+
+    /* Formulario Grid */
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px; }
     .form-group { display: flex; flex-direction: column; }
     label { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
     input, select, textarea {
       padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px;
-      transition: border-color 0.2s, box-shadow 0.2s; background: #fff; width: 100%; box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s; background: #fff;
     }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 47, 42, 0.1); }
-    
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 47, 42, 0.12); }
+
     /* Botones */
     .btn {
       padding: 12px 20px; background: var(--success); color: white; border: none;
@@ -72,178 +69,209 @@
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     }
     .btn:hover { background: var(--success-hover); }
+    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
     .btn-secondary { background: var(--secondary); }
     .btn-secondary:hover { background: var(--secondary-hover); }
     .btn-primary { background: var(--primary); }
     .btn-primary:hover { background: var(--primary-hover); }
-    
-    /* Estructura para Pegar desde Excel */
-    .excel-paste-container {
-      border: 2px dashed var(--border);
-      border-radius: 8px;
-      background: var(--bg-color);
-      overflow: hidden;
-      margin-bottom: 20px;
-    }
-    .excel-header {
-      background: #e2e8f0;
-      color: #334155;
-      padding: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      white-space: nowrap;
-      border-bottom: 1px solid #cbd5e1;
-    }
-    .excel-header span {
-      background: white;
-      padding: 4px 10px;
-      border-radius: 4px;
-      border: 1px solid #cbd5e1;
-    }
-    textarea.paste-area {
-      border: none; border-radius: 0;
-      resize: vertical;
-      min-height: 200px;
-      background: transparent;
-    }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+    /* Tabla */
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; border-radius: 8px; overflow: hidden; }
     th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
-    th { background-color: var(--bg-color); color: var(--text-muted); }
+    th { background-color: var(--bg-color); color: var(--text-muted); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
 
-    /* Modal */
+    /* Modal de Confirmación */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px);
+      background: rgba(0, 20, 18, 0.6); backdrop-filter: blur(2px);
       justify-content: center; align-items: center; z-index: 1000;
     }
     .modal {
-      background: white; padding: 32px; border-radius: 16px; width: 90%; max-width: 450px;
-      text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      background: white; padding: 32px; border-radius: 16px; width: 90%; max-width: 400px;
+      text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 47, 42, 0.15);
+      animation: scaleUp 0.3s ease-out;
     }
-    .modal p { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
+    @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal h3 { border: none; padding: 0; margin-top: 0; color: var(--text-main); }
+    .modal p { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
     .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+    .modal-buttons .btn { width: 100%; }
+
+    /* Loader Spinner */
     .loader-spinner {
       border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%;
       width: 32px; height: 32px; animation: spin 1s linear infinite; margin: 0 auto 16px auto;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Zona de pegado (reemplaza al input de archivo) */
+    .paste-zone {
+      border: 2px dashed var(--border); border-radius: 10px; background: var(--bg-color);
+      padding: 16px;
+    }
+    .paste-zone.con-datos { border-color: var(--success); background: #effaf8; }
+    .header-guide {
+      display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 12px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .header-chip {
+      flex: 0 0 auto; background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
+      padding: 6px 10px; border-radius: 6px; white-space: nowrap; letter-spacing: 0.02em;
+    }
+    .header-chip .idx { opacity: 0.7; margin-right: 4px; }
+    textarea.paste-input {
+      width: 100%; box-sizing: border-box; min-height: 160px; resize: vertical;
+      font-family: 'Consolas', 'Menlo', monospace; font-size: 12.5px; white-space: pre;
+      overflow-x: auto;
+    }
+    .paste-hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; line-height: 1.5; }
+    .paste-count { font-size: 12px; font-weight: 700; color: var(--primary); margin-top: 6px; }
+
+    .file-actions { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Panel de Control - Trámites</h2>
-  
+  <h2>Panel de Control - Base de Datos</h2>
+
+  <!-- Navegación -->
   <div class="tabs">
     <button class="tab-btn activo" onclick="cambiarModulo('modulo1-form')">📝 Registro Manual</button>
-    <button class="tab-btn" onclick="cambiarModulo('modulo1-excel')">📋 Pegar Nuevos (Masivo)</button>
-    <button class="tab-btn" onclick="cambiarModulo('modulo2')">🔄 Actualizar Estatus (Masivo)</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo1-excel')">📊 Alta Masiva (Pegar desde Excel)</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo2')">🔄 Actualizar Estatus (Pegar desde Excel)</button>
   </div>
 
   <!-- ================= MÓDULO 1: FORMULARIO ================= -->
   <div id="modulo1-form" class="modulo activo">
     <h3>Registro Manual de Tarjetas</h3>
+
     <div class="form-grid" id="formularioNuevos">
-      <!-- Mismos campos del formulario que ya tenías -->
       <div class="form-group"><label>Folio</label><input type="text" id="m1_folio"></div>
       <div class="form-group"><label>ID SARE</label><input type="text" id="m1_idSare"></div>
       <div class="form-group"><label>Nombre SARE</label><input type="text" id="m1_nombreSare"></div>
       <div class="form-group"><label>Municipio</label><input type="text" id="m1_municipio"></div>
       <div class="form-group"><label>CCT</label><input type="text" id="m1_cct"></div>
-      <div class="form-group"><label>Escuela</label><input type="text" id="m1_escuela"></div>
-      <div class="form-group"><label>ID Familia</label><input type="text" id="m1_idFamilia"></div>
+      <div class="form-group"><label>Nombre de la Escuela</label><input type="text" id="m1_escuela"></div>
+      <div class="form-group"><label>ID Becario o Familia</label><input type="text" id="m1_idFamilia"></div>
       <div class="form-group"><label>Nombre(s)</label><input type="text" id="m1_nombre"></div>
       <div class="form-group"><label>Primer Apellido</label><input type="text" id="m1_ap1"></div>
       <div class="form-group"><label>Segundo Apellido</label><input type="text" id="m1_ap2"></div>
       <div class="form-group"><label>Remesa</label><input type="text" id="m1_remesa"></div>
       <div class="form-group">
         <label>Programa</label>
-        <select id="m1_programa"><option value="BASICA">BÁSICA</option><option value="BUEMS">BUEMS</option><option value="JEF">JEF</option></select>
+        <select id="m1_programa">
+          <option value="BASICA">BÁSICA</option>
+          <option value="BUEMS">BUEMS</option>
+          <option value="JEF">JEF</option>
+        </select>
       </div>
       <div class="form-group"><label>Bloque</label><input type="text" id="m1_bloque"></div>
-      <div class="form-group"><label>Observaciones</label><input type="text" id="m1_obs" list="opcionesObs"></div>
-      <datalist id="opcionesObs"><option value="RECIBIDA DE OTRO ESTADO"></option><option value="NUEVA REMESA RECIBIDA"></option></datalist>
-      <div class="form-group"><label>Mes</label><input type="text" id="m1_mes"></div>
+      <div class="form-group">
+        <label>Observaciones</label>
+        <input type="text" id="m1_obs" list="opcionesObs">
+        <datalist id="opcionesObs">
+          <option value="RECIBIDA DE OTRO ESTADO"></option>
+          <option value="NUEVA REMESA RECIBIDA"></option>
+        </datalist>
+      </div>
+      <div class="form-group"><label>Mes de Remesa</label><input type="text" id="m1_mes"></div>
       <div class="form-group"><label>CURP</label><input type="text" id="m1_curp" maxlength="18"></div>
       <div class="form-group">
         <label>Estatus</label>
-        <select id="m1_estatus"><option value="PERTENECE A LA SARE 1301">PERTENECE A LA SARE 1301</option><option value="PERTENECE A LA SARE 1302">PERTENECE A LA SARE 1302</option></select>
+        <select id="m1_estatus">
+          <option value="PERTENECE A LA SARE 1301">PERTENECE A LA SARE 1301</option>
+          <option value="PERTENECE A LA SARE 1302">PERTENECE A LA SARE 1302</option>
+          <option value="PERTENECE A LA SARE 1303">PERTENECE A LA SARE 1303</option>
+          <option value="PERTENECE A LA SARE 1304">PERTENECE A LA SARE 1304</option>
+          <option value="PERTENECE A LA SARE 1305">PERTENECE A LA SARE 1305</option>
+          <option value="PERTENECE A LA SARE 1306">PERTENECE A LA SARE 1306</option>
+          <option value="PERTENECE A LA SARE 1307">PERTENECE A LA SARE 1307</option>
+        </select>
       </div>
     </div>
-    
+
     <div style="display: flex; gap: 10px;">
-      <button class="btn btn-secondary" onclick="agregarAlBloque()">➕ Agregar a Lista</button>
-      <button class="btn btn-primary" id="btnSincronizarManual" onclick="iniciarSincronizacion('manual')" style="display:none;">☁️ Sincronizar</button>
+      <button class="btn btn-secondary" onclick="agregarAlBloque()">➕ Agregar a la Lista</button>
+      <button class="btn btn-primary" id="btnSincronizarManual" onclick="iniciarSincronizacion('manual')" style="display:none;">☁️ Sincronizar Registros</button>
     </div>
 
     <table id="tablaBloque" style="display:none;">
-      <thead><tr><th>Folio</th><th>CCT</th><th>Nombre</th><th>Estatus</th></tr></thead>
+      <thead>
+        <tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo</th><th>Estatus</th></tr>
+      </thead>
       <tbody id="tbodyBloque"></tbody>
     </table>
   </div>
 
-  <!-- ================= MÓDULO 1: PEGAR EXCEL NUEVOS ================= -->
+  <!-- ================= MÓDULO 1: PEGADO NUEVOS ================= -->
   <div id="modulo1-excel" class="modulo">
-    <h3>Alta Masiva (Pegado Directo)</h3>
-    <p class="instrucciones">Copia las filas de tu Excel y pégalas en el cuadro blanco. Respeta el orden de estas 19 columnas:</p>
-    
-    <div class="excel-paste-container">
-      <div class="excel-header">
-        <span>Folio</span><span>ID SARE</span><span>Nom. SARE</span><span>Municipio</span><span>(Vacío)</span>
-        <span>CCT</span><span>Escuela</span><span>ID Familia</span><span>Nombre(s)</span><span>Ap 1</span><span>Ap 2</span>
-        <span>Remesa</span><span>Programa</span><span>Bloque</span><span>(Vacío)</span><span>Observaciones</span>
-        <span>Mes</span><span>CURP</span><span>Estatus</span>
-      </div>
-      <textarea id="pasteNuevos" class="paste-area" placeholder="Ejemplo: 001   SARE12   NOMBRE SARE   MUNICIPIO... (Pega aquí)"></textarea>
+    <h3>Alta Masiva de Tarjetas Nuevas</h3>
+    <div class="paste-zone" id="pasteZoneMod1">
+      <div class="header-guide" id="guideMod1"></div>
+      <textarea id="pasteMod1" class="paste-input" placeholder="Selecciona y copia (Ctrl+C) el rango de celdas en Excel, en el mismo orden de columnas de la guía de arriba, y pégalo aquí (Ctrl+V). Puedes incluir o no la fila de encabezado." oninput="contarFilasPegadas('pasteMod1','conteoMod1','pasteZoneMod1')"></textarea>
+      <div class="paste-count" id="conteoMod1">0 filas detectadas</div>
+      <div class="paste-hint">Orden de columnas esperado: FOLIO, ID SARE, NOMBRE SARE, MUNICIPIO, CCT, ESCUELA, ID FAMILIA, NOMBRE(S), APELLIDO 1, APELLIDO 2, REMESA, PROGRAMA, BLOQUE, OBSERVACIONES, MES REMESA, CURP, ESTATUS.</div>
     </div>
-    <button class="btn btn-primary" onclick="procesarPegadoNuevos()">📤 Sincronizar Nuevos</button>
+    <div class="file-actions">
+      <button class="btn btn-primary" onclick="procesarPegadoNuevos()" style="width: 260px;">📤 Procesar y Sincronizar</button>
+    </div>
   </div>
 
-  <!-- ================= MÓDULO 2: ACTUALIZACIÓN MASIVA ================= -->
+  <!-- ================= MÓDULO 2: ACTUALIZACIÓN ================= -->
   <div id="modulo2" class="modulo">
-    <h3>Actualización Rápida de Estatus</h3>
-    <p class="instrucciones">Copia las 3 columnas de tu Excel y pégalas abajo. Se usarán para buscar y actualizar al instante.</p>
-    
-    <div class="excel-paste-container">
-      <div class="excel-header">
-        <span>FOLIO</span><span>ESTATUS NUEVO</span><span>OBSERVACIONES</span>
-      </div>
-      <textarea id="pasteUpdate" class="paste-area" placeholder="Ejemplo: 987654   ENTREGADA   SE ENTREGÓ HOY... (Pega aquí)"></textarea>
+    <h3>Actualización Masiva de Estatus</h3>
+    <div class="paste-zone" id="pasteZoneMod2">
+      <div class="header-guide" id="guideMod2"></div>
+      <textarea id="pasteMod2" class="paste-input" placeholder="Copia (Ctrl+C) las columnas FOLIO, ESTATUS y OBSERVACIONES desde Excel y pégalas aquí (Ctrl+V). Puedes incluir o no la fila de encabezado." oninput="contarFilasPegadas('pasteMod2','conteoMod2','pasteZoneMod2')"></textarea>
+      <div class="paste-count" id="conteoMod2">0 filas detectadas</div>
+      <div class="paste-hint">Orden de columnas esperado: FOLIO, ESTATUS, OBSERVACIONES.</div>
     </div>
-    
-    <button class="btn btn-primary" onclick="procesarPegadoUpdate()">🔄 Actualizar Base de Datos</button>
+    <div class="file-actions">
+      <button class="btn btn-primary" onclick="procesarPegadoUpdate()" style="width: 260px;">🔄 Actualizar Base de Datos</button>
+    </div>
     <div id="resMod2" style="margin-top: 20px; font-weight: 600;"></div>
-    <button id="btnDescargarReporte" class="btn btn-secondary" onclick="generarReporteExcel()" style="display:none; margin-top: 15px;">📥 Descargar Reporte en Excel</button>
+    <button id="btnDescargarReporte" class="btn btn-secondary" onclick="generarReporteExcel()" style="display:none; margin-top: 15px;">📥 Descargar Reporte de Resultados</button>
   </div>
 
 </div>
 
-<!-- MODAL -->
+<!-- ================= MODAL GLOBAL ================= -->
 <div class="modal-overlay" id="confirmModal">
   <div class="modal">
-    <h3 id="modalTitle" style="color: var(--primary); margin-top:0;">Procesando</h3>
+    <h3 id="modalTitle">Confirmar Acción</h3>
     <div id="modalLoader" class="loader-spinner"></div>
-    <p id="modalMessage">Por favor espera...</p>
+    <p id="modalMessage">Procesando solicitud...</p>
+
     <div class="modal-buttons" id="modalButtons" style="display:none;">
       <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn btn-primary" id="btnAceptarModal" onclick="ejecutarSincronizacion()">Aceptar y Enviar</button>
+      <button class="btn" id="btnAceptarModal" onclick="ejecutarSincronizacion()">Aceptar y Enviar</button>
     </div>
   </div>
 </div>
 
 <script>
-  // 🔴 AQUÍ VA LA URL DE TU SCRIPT DE GOOGLE
-  const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbxOQPMOE4IT-P5IKsBbBlf7Jl1csTPpbz4ypP9FrcLiwyflNLyKDSNvHmP_nBHjuT0yYQ/exec';
+  // =========================================================================
+  // 🔴 AQUÍ VA LA URL DEL DEPLOY DE TU GOOGLE APPS SCRIPT
+  // =========================================================================
+  const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbwjcR537YtYXhyP57T3pTKLwS_6FZ1lT-OJo-piJrC8jlr7WWraVl5XWohSmVhQ0Km7hA/exec';
 
-  let bloqueActualManual = []; 
-  let bloqueActualPaste = [];
-  let reporteMasivoGenerado = []; 
-  let tipoSincronizacionActiva = null;
+  let bloqueActualManual = [];
+  let bloqueActualExcel = [];
+  let reporteMasivoGenerado = [];
+  let tipoSincronizacionActiva = null; // 'manual' o 'excel_nuevos'
 
+  // Encabezados guía para las zonas de pegado (deben coincidir con el orden que se pega desde Excel)
+  const ENCABEZADOS_MOD1 = ["FOLIO","ID SARE","NOMBRE SARE","MUNICIPIO","CCT","ESCUELA","ID FAMILIA","NOMBRE(S)","APELLIDO 1","APELLIDO 2","REMESA","PROGRAMA","BLOQUE","OBSERVACIONES","MES REMESA","CURP","ESTATUS"];
+  const ENCABEZADOS_MOD2 = ["FOLIO","ESTATUS","OBSERVACIONES"];
+
+  function pintarGuia(idContenedor, encabezados) {
+    const cont = document.getElementById(idContenedor);
+    cont.innerHTML = encabezados.map((h, i) => `<span class="header-chip"><span class="idx">${i+1}</span>${h}</span>`).join("");
+  }
+
+  // UTILIDAD: Petición HTTP al backend
   async function llamarBackend(accion, payload = null) {
     try {
       const response = await fetch(URL_BACKEND_GAS, {
@@ -253,14 +281,18 @@
       });
       return await response.json();
     } catch (error) {
-      return { exito: false, error: 'Fallo la conexión: ' + error.message };
+      return { exito: false, error: 'Fallo la conexión con el servidor: ' + error.message };
     }
   }
 
+  // Fuerza mayúsculas en las entradas de texto (no en los textareas de pegado)
   document.addEventListener('input', function(e) {
-    if(e.target.tagName === 'INPUT' && e.target.type === 'text') e.target.value = e.target.value.toUpperCase();
+    if(e.target.tagName === 'INPUT' && e.target.type === 'text') {
+      e.target.value = e.target.value.toUpperCase();
+    }
   });
 
+  // Cambiar pestañas
   function cambiarModulo(id) {
     document.querySelectorAll('.modulo').forEach(m => m.classList.remove('activo'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
@@ -268,36 +300,113 @@
     event.currentTarget.classList.add('activo');
   }
 
-  /* --- MODAL --- */
-  function abrirModal(mensaje, cargando = true, mostrarBotones = false) {
+  /* ==============================================================
+     LÓGICA DEL MODAL
+  ============================================================== */
+  function abrirModal(mensaje, cargando = true) {
     document.getElementById('confirmModal').style.display = 'flex';
+    document.getElementById('modalTitle').innerText = 'Confirmar Acción';
     document.getElementById('modalMessage').innerHTML = mensaje;
-    document.getElementById('modalLoader').style.display = cargando ? 'block' : 'none';
-    document.getElementById('modalButtons').style.display = mostrarBotones ? 'flex' : 'none';
-  }
-  function cerrarModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
-  /* --- MÓDULO 1: MANUAL --- */
+    if(cargando) {
+      document.getElementById('modalLoader').style.display = 'block';
+      document.getElementById('modalButtons').style.display = 'none';
+    } else {
+      document.getElementById('modalLoader').style.display = 'none';
+      document.getElementById('modalButtons').style.display = 'flex';
+    }
+  }
+
+  function cerrarModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    tipoSincronizacionActiva = null;
+  }
+
+  // Se activa al dar clic en sincronizar manual o pegado nuevos
+  async function iniciarSincronizacion(tipo) {
+    tipoSincronizacionActiva = tipo;
+    let total = (tipo === 'manual') ? bloqueActualManual.length : bloqueActualExcel.length;
+
+    if(total === 0) return alert("No hay datos para sincronizar.");
+
+    abrirModal(`Consultando disponibilidad en la base de datos...`, true);
+
+    const res = await llamarBackend('obtenerSiguienteFila');
+
+    if(res.exito) {
+      abrirModal(
+        `Se encontró espacio libre.<br>Se guardarán <strong>${total} registros</strong> a partir de la <strong>Fila ${res.fila}</strong>.<br><br>¿Deseas proceder?`,
+        false
+      );
+    } else {
+      abrirModal(`<span style="color:red">Error: ${res.error}</span>`, false);
+      document.getElementById('modalButtons').style.display = 'none';
+      setTimeout(cerrarModal, 3000);
+    }
+  }
+
+  // Se ejecuta si el usuario da clic en "Aceptar y Enviar"
+  async function ejecutarSincronizacion() {
+    abrirModal('Sincronizando datos... Por favor espera.', true);
+    document.getElementById('modalTitle').innerText = 'Sincronizando';
+
+    let payload = (tipoSincronizacionActiva === 'manual') ? bloqueActualManual : bloqueActualExcel;
+
+    const res = await llamarBackend('registrarBloqueTarjetas', payload);
+
+    if(res.exito) {
+      abrirModal(`<strong>¡Éxito!</strong><br>${res.mensaje}`, false);
+      document.getElementById('modalButtons').style.display = 'none';
+
+      // Limpiezas
+      if(tipoSincronizacionActiva === 'manual') {
+        bloqueActualManual = [];
+        document.getElementById("tbodyBloque").innerHTML = "";
+        document.getElementById("tablaBloque").style.display = "none";
+        document.getElementById("btnSincronizarManual").style.display = "none";
+      } else {
+        bloqueActualExcel = [];
+        document.getElementById('pasteMod1').value = "";
+        contarFilasPegadas('pasteMod1','conteoMod1','pasteZoneMod1');
+      }
+
+      setTimeout(cerrarModal, 2500);
+    } else {
+      abrirModal(`<span style="color:red">Error al guardar: ${res.error}</span>`, false);
+      document.getElementById('modalButtons').innerHTML = `<button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>`;
+      document.getElementById('modalButtons').style.display = 'flex';
+    }
+  }
+
+
+  /* ==============================================================
+     MÓDULO 1: FORMULARIO MANUAL
+  ============================================================== */
   function agregarAlBloque() {
     const n = document.getElementById("m1_nombre").value;
     const ap1 = document.getElementById("m1_ap1").value;
     const ap2 = document.getElementById("m1_ap2").value;
     const nombreCompleto = `${n} ${ap1} ${ap2}`.trim();
-    if(!document.getElementById("m1_folio").value || !n) return alert("Folio y Nombre son obligatorios.");
 
+    if(!document.getElementById("m1_folio").value || !n) {
+      return alert("El Folio y el Nombre son obligatorios.");
+    }
+
+    const fechaActual = new Date().toLocaleDateString('es-MX');
     let obs = document.getElementById("m1_obs").value;
-    const fecha = new Date().toLocaleDateString('es-MX');
-    obs = obs ? `${obs} - ${fecha}` : fecha;
+    obs = obs ? `${obs} - ${fechaActual}` : fechaActual;
 
     let filaNueva = new Array(20).fill("");
-    filaNueva[0] = document.getElementById("m1_folio").value;
-    filaNueva[1] = document.getElementById("m1_idSare").value;
-    filaNueva[2] = document.getElementById("m1_nombreSare").value;
-    filaNueva[3] = document.getElementById("m1_municipio").value;
-    filaNueva[5] = document.getElementById("m1_cct").value;
-    filaNueva[6] = document.getElementById("m1_escuela").value;
-    filaNueva[7] = document.getElementById("m1_idFamilia").value;
-    filaNueva[8] = n; filaNueva[9] = ap1; filaNueva[10] = ap2;
+    filaNueva[0]  = document.getElementById("m1_folio").value;
+    filaNueva[1]  = document.getElementById("m1_idSare").value;
+    filaNueva[2]  = document.getElementById("m1_nombreSare").value;
+    filaNueva[3]  = document.getElementById("m1_municipio").value;
+    filaNueva[5]  = document.getElementById("m1_cct").value;
+    filaNueva[6]  = document.getElementById("m1_escuela").value;
+    filaNueva[7]  = document.getElementById("m1_idFamilia").value;
+    filaNueva[8]  = n;
+    filaNueva[9]  = ap1;
+    filaNueva[10] = ap2;
     filaNueva[11] = document.getElementById("m1_remesa").value;
     filaNueva[12] = document.getElementById("m1_programa").value;
     filaNueva[13] = document.getElementById("m1_bloque").value;
@@ -308,115 +417,142 @@
     filaNueva[19] = nombreCompleto;
 
     bloqueActualManual.push(filaNueva);
-    document.getElementById("tbodyBloque").innerHTML += `<tr><td>${filaNueva[0]}</td><td>${filaNueva[5]}</td><td>${nombreCompleto}</td><td><b>${filaNueva[18]}</b></td></tr>`;
+
+    document.getElementById("tbodyBloque").innerHTML += `<tr>
+      <td>${filaNueva[0]}</td><td>${filaNueva[5]}</td><td>${filaNueva[7]}</td>
+      <td>${filaNueva[19]}</td>
+      <td><span style="background:#dff3f1; color:#00534a; padding:4px 8px; border-radius:4px; font-size:11px;">${filaNueva[18]}</span></td>
+    </tr>`;
+
     document.getElementById("tablaBloque").style.display = "table";
     document.getElementById("btnSincronizarManual").style.display = "inline-flex";
-    document.querySelectorAll('#formularioNuevos input').forEach(i => i.value = "");
+
+    document.querySelectorAll('#formularioNuevos input').forEach(inp => inp.value = "");
   }
 
-  /* --- PARSEAR TABULADORES (Pegado desde Excel) --- */
-  function parsePaste(textareaId) {
-    const raw = document.getElementById(textareaId).value;
-    if(!raw.trim()) return [];
-    return raw.split('\n')
-              .map(row => row.split('\t').map(c => c.trim().toUpperCase()))
-              .filter(row => row.some(cell => cell !== '')); // Quita filas vacías
-  }
 
-  /* --- MÓDULO 1: PEGAR MASIVO --- */
-  function procesarPegadoNuevos() {
-    let rows = parsePaste('pasteNuevos');
-    if(rows.length === 0) return alert("El cuadro está vacío. Pega los datos de Excel.");
+  /* ==============================================================
+     ZONAS DE PEGADO: utilidades compartidas
+  ============================================================== */
 
-    // Eliminar fila de encabezados si el usuario los copió por error
-    if(rows[0][0].includes("FOLIO")) rows.shift();
+  // Convierte el texto pegado (tab-delimitado, como copia Excel) en un arreglo de filas de celdas.
+  // Detecta y descarta automáticamente una fila de encabezado si viene incluida.
+  function parsearPegado(texto, encabezados) {
+    const lineas = texto.split(/\r\n|\r|\n/).filter(l => l.trim() !== "");
+    if(lineas.length === 0) return [];
 
-    bloqueActualPaste = [];
-    const fecha = new Date().toLocaleDateString('es-MX');
-
-    for(let r of rows) {
-      if(!r[0]) continue;
-      let fData = new Array(20).fill("");
-      
-      // Mapear celdas copiadas (basado en 19 columnas pegadas)
-      fData[0] = r[0] || ""; fData[1] = r[1] || ""; fData[2] = r[2] || ""; fData[3] = r[3] || "";
-      fData[5] = r[5] || ""; fData[6] = r[6] || ""; fData[7] = r[7] || ""; 
-      fData[8] = r[8] || ""; fData[9] = r[9] || ""; fData[10] = r[10] || "";
-      fData[11] = r[11] || ""; fData[12] = r[12] || ""; fData[13] = r[13] || "";
-      fData[15] = r[15] ? `${r[15]} - ${fecha}` : fecha;
-      fData[16] = r[16] || ""; fData[17] = r[17] || ""; fData[18] = r[18] || "";
-      fData[19] = `${fData[8]} ${fData[9]} ${fData[10]}`.trim(); // Nombre Completo automático
-
-      bloqueActualPaste.push(fData);
-    }
-    
-    if(bloqueActualPaste.length > 0) iniciarSincronizacion('paste');
-  }
-
-  async function iniciarSincronizacion(tipo) {
-    tipoSincronizacionActiva = tipo;
-    let total = (tipo === 'manual') ? bloqueActualManual.length : bloqueActualPaste.length;
-    abrirModal(`Consultando base de datos, buscando espacio libre...`, true, false);
-
-    const res = await llamarBackend('obtenerSiguienteFila');
-    if(res.exito) {
-      abrirModal(`Se encontró espacio libre al instante.<br>Se guardarán <strong>${total} registros</strong>.<br>¿Deseas proceder?`, false, true);
-    } else {
-      abrirModal(`<span style="color:red">${res.error}</span>`, false, false);
-      setTimeout(cerrarModal, 3000);
-    }
-  }
-
-  async function ejecutarSincronizacion() {
-    abrirModal('Sincronizando de golpe... Esto tomará 2 segundos.', true, false);
-    let payload = (tipoSincronizacionActiva === 'manual') ? bloqueActualManual : bloqueActualPaste;
-    
-    const res = await llamarBackend('registrarBloqueTarjetas', payload);
-    if(res.exito) {
-      abrirModal(`<strong>¡Éxito!</strong><br>${res.mensaje}`, false, false);
-      if(tipoSincronizacionActiva === 'manual') {
-        bloqueActualManual = [];
-        document.getElementById("tbodyBloque").innerHTML = "";
-        document.getElementById("tablaBloque").style.display = "none";
-        document.getElementById("btnSincronizarManual").style.display = "none";
-      } else {
-        bloqueActualPaste = [];
-        document.getElementById('pasteNuevos').value = "";
+    let filas = lineas.map(linea => {
+      // Excel copia con tabuladores; si no hay tabs pero sí comas, se usa coma como respaldo (CSV)
+      if(linea.indexOf('\t') === -1 && linea.indexOf(',') !== -1) {
+        return linea.split(',').map(c => c.trim());
       }
-      setTimeout(cerrarModal, 2000);
+      return linea.split('\t').map(c => c.trim());
+    });
+
+    const primerCelda = (filas[0][0] || "").trim().toUpperCase();
+    if(primerCelda === encabezados[0]) {
+      filas.shift();
+    }
+    return filas.filter(f => f[0]); // descarta filas sin folio
+  }
+
+  function contarFilasPegadas(idTextarea, idConteo, idZona) {
+    const texto = document.getElementById(idTextarea).value;
+    const encabezados = idTextarea === 'pasteMod1' ? ENCABEZADOS_MOD1 : ENCABEZADOS_MOD2;
+    const filas = parsearPegado(texto, encabezados);
+    const zona = document.getElementById(idZona);
+    document.getElementById(idConteo).innerText = `${filas.length} fila(s) detectada(s)`;
+    if(filas.length > 0) { zona.classList.add('con-datos'); } else { zona.classList.remove('con-datos'); }
+    return filas;
+  }
+
+
+  /* ==============================================================
+     MÓDULO 1: PEGADO NUEVOS
+  ============================================================== */
+  function procesarPegadoNuevos() {
+    const texto = document.getElementById('pasteMod1').value;
+    const filas = parsearPegado(texto, ENCABEZADOS_MOD1);
+
+    if(filas.length === 0) return alert("Pega los datos copiados de Excel antes de continuar.");
+
+    bloqueActualExcel = [];
+    const fechaActual = new Date().toLocaleDateString('es-MX');
+
+    filas.forEach(row => {
+      let fData = new Array(20).fill("");
+      let n   = String(row[7]  || "").toUpperCase();
+      let ap1 = String(row[8]  || "").toUpperCase();
+      let ap2 = String(row[9]  || "").toUpperCase();
+      let obsOrig = String(row[13] || "").toUpperCase();
+
+      fData[0] = String(row[0]  || "").toUpperCase(); // FOLIO
+      fData[1] = String(row[1]  || "").toUpperCase(); // ID SARE
+      fData[2] = String(row[2]  || "").toUpperCase(); // NOMBRE SARE
+      fData[3] = String(row[3]  || "").toUpperCase(); // MUNICIPIO
+      fData[5] = String(row[4]  || "").toUpperCase(); // CCT
+      fData[6] = String(row[5]  || "").toUpperCase(); // ESCUELA
+      fData[7] = String(row[6]  || "").toUpperCase(); // ID FAMILIA
+      fData[8] = n; fData[9] = ap1; fData[10] = ap2;
+      fData[11] = String(row[10] || "").toUpperCase(); // REMESA
+      fData[12] = String(row[11] || "").toUpperCase(); // PROGRAMA
+      fData[13] = String(row[12] || "").toUpperCase(); // BLOQUE
+      fData[15] = obsOrig ? `${obsOrig} - ${fechaActual}` : fechaActual; // OBSERVACIONES
+      fData[16] = String(row[14] || "").toUpperCase(); // MES REMESA
+      fData[17] = String(row[15] || "").toUpperCase(); // CURP
+      fData[18] = String(row[16] || "").toUpperCase(); // ESTATUS
+      fData[19] = `${n} ${ap1} ${ap2}`.trim();
+
+      bloqueActualExcel.push(fData);
+    });
+
+    if(bloqueActualExcel.length > 0) {
+      iniciarSincronizacion('excel_nuevos');
+    } else {
+      alert("No se detectaron filas válidas en los datos pegados.");
     }
   }
 
-  /* --- MÓDULO 2: ACTUALIZACIÓN MASIVA PEGAR --- */
+
+  /* ==============================================================
+     MÓDULO 2: ACTUALIZACIÓN MASIVA
+  ============================================================== */
   async function procesarPegadoUpdate() {
-    let rows = parsePaste('pasteUpdate');
-    if(rows.length === 0) return alert("Pega los datos primero.");
-    if(rows[0][0].includes("FOLIO")) rows.shift(); // Quitar encabezados
+    const texto = document.getElementById('pasteMod2').value;
+    const filas = parsearPegado(texto, ENCABEZADOS_MOD2);
 
-    let arrayUpdates = [];
-    for(let r of rows) {
-      if(!r[0]) continue;
-      arrayUpdates.push({ folio: r[0], estatus: r[1]||"", obs: r[2]||"" });
-    }
+    if(filas.length === 0) return alert("Pega los datos copiados de Excel antes de continuar.");
 
-    abrirModal('Procesando datos en memoria RAM del servidor... (Ultra rápido)', true, false);
+    abrirModal('Procesando actualizaciones masivas...<br>No cierres esta ventana.', true);
     document.getElementById("btnDescargarReporte").style.display = "none";
     document.getElementById("resMod2").innerHTML = "";
 
+    const arrayUpdates = filas.map(row => ({
+      folio:   String(row[0] || "").toUpperCase(),
+      estatus: String(row[1] || "").toUpperCase(),
+      obs:     String(row[2] || "").toUpperCase()
+    }));
+
     const res = await llamarBackend('procesarActualizacionMasiva', arrayUpdates);
-    
+
     if(res.exito) {
-      abrirModal(`<strong>Completado en Segundos</strong><br>
-                  <span style="color:green">✔ ${res.estadisticas.exitos} Actualizados</span><br>
-                  <span style="color:red">✖ ${res.estadisticas.fallos} No Encontrados</span>`, false, false);
-      
-      document.getElementById('modalButtons').innerHTML = `<button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>`;
-      document.getElementById('modalButtons').style.display = 'flex';
-      
-      document.getElementById("resMod2").innerHTML = `Resumen: <span style="color:green">${res.estadisticas.exitos} Actualizados</span> | <span style="color:red">${res.estadisticas.fallos} Fallos</span>`;
+      abrirModal(`<strong>Actualización Finalizada</strong><br>
+                  <span style="color:#0d9488">✔ ${res.estadisticas.exitos} Actualizados</span><br>
+                  <span style="color:#c0392b">✖ ${res.estadisticas.fallos} No Encontrados</span>`, false);
+
+      document.getElementById('modalButtons').innerHTML = `<button class="btn" onclick="cerrarModal()">Cerrar</button>`;
+
+      document.getElementById("resMod2").innerHTML =
+        `Resumen: <span style="color:#0d9488">${res.estadisticas.exitos} Actualizados</span> |
+        <span style="color:#c0392b">${res.estadisticas.fallos} No Encontrados</span>`;
+
       reporteMasivoGenerado = res.reporte;
       document.getElementById("btnDescargarReporte").style.display = "inline-flex";
-      document.getElementById("pasteUpdate").value = "";
+      document.getElementById('pasteMod2').value = "";
+      contarFilasPegadas('pasteMod2','conteoMod2','pasteZoneMod2');
+    } else {
+      abrirModal(`<span style="color:red">Error: ${res.error}</span>`, false);
+      document.getElementById('modalButtons').innerHTML = `<button class="btn" onclick="cerrarModal()">Cerrar</button>`;
     }
   }
 
@@ -427,6 +563,12 @@
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataFinal), "Reporte");
     XLSX.writeFile(wb, "Reporte_Actualizacion.xlsx");
   }
+
+  /* ==============================================================
+     INICIALIZACIÓN
+  ============================================================== */
+  pintarGuia('guideMod1', ENCABEZADOS_MOD1);
+  pintarGuia('guideMod2', ENCABEZADOS_MOD2);
 </script>
 
 </body>
