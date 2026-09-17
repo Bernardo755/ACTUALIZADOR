@@ -2,85 +2,164 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>App de Trámites</title>
-  <!-- SheetJS para leer y exportar Excel localmente -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; padding: 20px; color: #333; }
-    .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    h2, h3 { color: #2c3e50; }
+    :root {
+      --primary: #2563eb; --primary-hover: #1d4ed8;
+      --secondary: #64748b; --secondary-hover: #475569;
+      --success: #10b981; --success-hover: #059669;
+      --bg-color: #f8fafc; --surface: #ffffff;
+      --text-main: #0f172a; --text-muted: #475569;
+      --border: #e2e8f0; --radius: 12px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--surface);
+      padding: 30px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    h2 { margin-top: 0; color: var(--primary); font-weight: 700; text-align: center; margin-bottom: 25px; }
+    h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 20px; color: var(--text-main); border-bottom: 2px solid var(--border); padding-bottom: 10px; }
     
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-    .tab-btn { padding: 10px 15px; border: none; background: #eee; cursor: pointer; border-radius: 4px; font-weight: bold; }
-    .tab-btn.activo { background: #3498db; color: white; }
+    /* Tabs */
+    .tabs { display: flex; gap: 10px; margin-bottom: 25px; overflow-x: auto; }
+    .tab-btn {
+      padding: 12px 20px; border: none; background: var(--bg-color); color: var(--text-muted);
+      cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 14px; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { background: #e2e8f0; }
+    .tab-btn.activo { background: var(--primary); color: white; box-shadow: 0 2px 4px rgba(37,99,235,0.2); }
     
-    .modulo { display: none; }
+    .modulo { display: none; animation: fadeIn 0.3s; }
     .modulo.activo { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    /* Formulario Grid */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 25px; }
     .form-group { display: flex; flex-direction: column; }
-    label { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555;}
-    input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; text-transform: uppercase; }
+    label { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+    input, select {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 14px;
+      transition: border-color 0.2s, box-shadow 0.2s; background: #fff;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
     
-    .btn { padding: 10px 15px; background: #2ecc71; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    .btn:disabled { background: #95a5a6; cursor: not-allowed; }
-    .btn-secondary { background: #34495e; }
+    /* Botones */
+    .btn {
+      padding: 12px 20px; background: var(--success); color: white; border: none;
+      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: background 0.2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:hover { background: var(--success-hover); }
+    .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-secondary { background: var(--secondary); }
+    .btn-secondary:hover { background: var(--secondary-hover); }
+    .btn-primary { background: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
     
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-    th, td { padding: 8px; border: 1px solid #ddd; text-align: left; }
-    th { background-color: #34495e; color: white; }
+    /* Tabla */
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; border-radius: 8px; overflow: hidden; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; }
+    th { background-color: var(--bg-color); color: var(--text-muted); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
     
-    .loader { display: none; color: #e67e22; font-weight: bold; margin-top: 10px; }
-    .aviso-fila { background: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-weight: bold; border-left: 4px solid #ffeeba;}
+    /* Modal de Confirmación */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px);
+      justify-content: center; align-items: center; z-index: 1000;
+    }
+    .modal {
+      background: white; padding: 32px; border-radius: 16px; width: 90%; max-width: 400px;
+      text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      animation: scaleUp 0.3s ease-out;
+    }
+    @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal h3 { border: none; padding: 0; margin-top: 0; color: var(--text-main); }
+    .modal p { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    .modal-buttons { display: flex; gap: 12px; justify-content: center; }
+    .modal-buttons .btn { width: 100%; }
+    
+    /* Loader Spinner */
+    .loader-spinner {
+      border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%;
+      width: 32px; height: 32px; animation: spin 1s linear infinite; margin: 0 auto 16px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Input File moderno */
+    input[type="file"] { padding: 10px; background: var(--bg-color); border: 2px dashed var(--border); width: 100%; box-sizing: border-box; cursor: pointer; }
+    
+    .file-actions { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Gestor de Trámites de Base de Datos</h2>
+  <h2>Panel de Control - Base de Datos</h2>
   
+  <!-- Navegación -->
   <div class="tabs">
-    <button class="tab-btn activo" onclick="cambiarModulo('modulo1-form')">Mod 1: Formulario Nuevos</button>
-    <button class="tab-btn" onclick="cambiarModulo('modulo1-excel')">Mod 1: Excel Nuevos</button>
-    <button class="tab-btn" onclick="cambiarModulo('modulo2')">Mod 2: Actualización Estatus</button>
+    <button class="tab-btn activo" onclick="cambiarModulo('modulo1-form')">📝 Registro Manual</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo1-excel')">📊 Alta Masiva (Excel)</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo2')">🔄 Actualizar Estatus</button>
   </div>
 
-  <!-- MÓDULO 1: FORMULARIO -->
+  <!-- ================= MÓDULO 1: FORMULARIO ================= -->
   <div id="modulo1-form" class="modulo activo">
     <h3>Registro Manual de Tarjetas</h3>
-    <div class="aviso-fila">Cargando celda de destino...</div>
     
     <div class="form-grid" id="formularioNuevos">
-      <div class="form-group"><label>Folio (Col A)</label><input type="text" id="m1_folio"></div>
-      <div class="form-group"><label>ID SARE (Col B)</label><input type="text" id="m1_idSare"></div>
-      <div class="form-group"><label>Nombre SARE (Col C)</label><input type="text" id="m1_nombreSare"></div>
-      <div class="form-group"><label>Municipio (Col D)</label><input type="text" id="m1_municipio"></div>
-      <div class="form-group"><label>CCT (Col F)</label><input type="text" id="m1_cct"></div>
-      <div class="form-group"><label>Nombre Escuela (Col G)</label><input type="text" id="m1_escuela"></div>
-      <div class="form-group"><label>ID Becario/Fam (Col H)</label><input type="text" id="m1_idFamilia"></div>
-      <div class="form-group"><label>Nombre (Col I)</label><input type="text" id="m1_nombre"></div>
-      <div class="form-group"><label>Primer Apellido (Col J)</label><input type="text" id="m1_ap1"></div>
-      <div class="form-group"><label>Segundo Apellido (Col K)</label><input type="text" id="m1_ap2"></div>
-      <div class="form-group"><label>Remesa (Col L)</label><input type="text" id="m1_remesa"></div>
+      <div class="form-group"><label>Folio</label><input type="text" id="m1_folio"></div>
+      <div class="form-group"><label>ID SARE</label><input type="text" id="m1_idSare"></div>
+      <div class="form-group"><label>Nombre SARE</label><input type="text" id="m1_nombreSare"></div>
+      <div class="form-group"><label>Municipio</label><input type="text" id="m1_municipio"></div>
+      <div class="form-group"><label>CCT</label><input type="text" id="m1_cct"></div>
+      <div class="form-group"><label>Nombre de la Escuela</label><input type="text" id="m1_escuela"></div>
+      <div class="form-group"><label>ID Becario o Familia</label><input type="text" id="m1_idFamilia"></div>
+      <div class="form-group"><label>Nombre(s)</label><input type="text" id="m1_nombre"></div>
+      <div class="form-group"><label>Primer Apellido</label><input type="text" id="m1_ap1"></div>
+      <div class="form-group"><label>Segundo Apellido</label><input type="text" id="m1_ap2"></div>
+      <div class="form-group"><label>Remesa</label><input type="text" id="m1_remesa"></div>
       <div class="form-group">
-        <label>Programa (Col M)</label>
+        <label>Programa</label>
         <select id="m1_programa">
-          <option value="BASICA">BASICA</option><option value="BUEMS">BUEMS</option><option value="JEF">JEF</option>
+          <option value="BASICA">BÁSICA</option>
+          <option value="BUEMS">BUEMS</option>
+          <option value="JEF">JEF</option>
         </select>
       </div>
-      <div class="form-group"><label>Bloque (Col N)</label><input type="text" id="m1_bloque"></div>
+      <div class="form-group"><label>Bloque</label><input type="text" id="m1_bloque"></div>
       <div class="form-group">
-        <label>OBS (Col P)</label>
+        <label>Observaciones</label>
         <input type="text" id="m1_obs" list="opcionesObs">
         <datalist id="opcionesObs">
           <option value="RECIBIDA DE OTRO ESTADO"></option>
           <option value="NUEVA REMESA RECIBIDA"></option>
         </datalist>
       </div>
-      <div class="form-group"><label>Mes de Remesa (Col Q)</label><input type="text" id="m1_mes"></div>
-      <div class="form-group"><label>CURP (Col R)</label><input type="text" id="m1_curp" maxlength="18"></div>
+      <div class="form-group"><label>Mes de Remesa</label><input type="text" id="m1_mes"></div>
+      <div class="form-group"><label>CURP</label><input type="text" id="m1_curp" maxlength="18"></div>
       <div class="form-group">
-        <label>Estatus (Col S)</label>
+        <label>Estatus</label>
         <select id="m1_estatus">
           <option value="PERTENECE A LA SARE 1301">PERTENECE A LA SARE 1301</option>
           <option value="PERTENECE A LA SARE 1302">PERTENECE A LA SARE 1302</option>
@@ -93,57 +172,72 @@
       </div>
     </div>
     
-    <button class="btn btn-secondary" onclick="agregarAlBloque()">➕ Agregar al Bloque</button>
-    <button class="btn" id="btnEnviarBloque" onclick="enviarBloque()" style="display:none;">☁️ Sincronizar Bloque</button>
-    <div id="loaderForm" class="loader">⏳ Sincronizando datos...</div>
+    <div style="display: flex; gap: 10px;">
+      <button class="btn btn-secondary" onclick="agregarAlBloque()">➕ Agregar a la Lista</button>
+      <button class="btn btn-primary" id="btnSincronizarManual" onclick="iniciarSincronizacion('manual')" style="display:none;">☁️ Sincronizar Registros</button>
+    </div>
 
     <table id="tablaBloque" style="display:none;">
       <thead>
-        <tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo (Auto)</th><th>Estatus</th></tr>
+        <tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo</th><th>Estatus</th></tr>
       </thead>
       <tbody id="tbodyBloque"></tbody>
     </table>
   </div>
 
-  <!-- MÓDULO 1: EXCEL NUEVOS -->
+  <!-- ================= MÓDULO 1: EXCEL NUEVOS ================= -->
   <div id="modulo1-excel" class="modulo">
-    <h3>Carga Masiva de Tarjetas Nuevas (Excel)</h3>
-    <div class="aviso-fila">Cargando celda de destino...</div>
-    <input type="file" id="archivoMod1" accept=".xlsx, .xls">
-    <button class="btn" onclick="procesarExcelNuevos()">📤 Sincronizar Excel</button>
-    <div id="loaderExcelNuevos" class="loader">⏳ Procesando y sincronizando archivo...</div>
+    <h3>Carga Masiva de Tarjetas Nuevas</h3>
+    <div class="file-actions">
+      <input type="file" id="archivoMod1" accept=".xlsx, .xls">
+      <button class="btn btn-primary" onclick="procesarExcelNuevos()" style="width: 250px;">📤 Leer y Sincronizar Excel</button>
+    </div>
   </div>
 
-  <!-- MÓDULO 2: ACTUALIZACIÓN ESTATUS -->
+  <!-- ================= MÓDULO 2: ACTUALIZACIÓN ================= -->
   <div id="modulo2" class="modulo">
     <h3>Actualización Masiva de Estatus</h3>
-    <input type="file" id="archivoMod2" accept=".xlsx, .xls">
-    <button class="btn" onclick="procesarExcelUpdate()">🔄 Sincronizar y Actualizar</button>
-    <div id="loaderMod2" class="loader">⏳ Buscando y sincronizando, no cierres la ventana...</div>
-    
-    <div id="resMod2" style="margin-top: 20px; font-weight: bold;"></div>
-    <button id="btnDescargarReporte" class="btn btn-secondary" style="display:none;">📥 Descargar Reporte</button>
+    <div class="file-actions">
+      <input type="file" id="archivoMod2" accept=".xlsx, .xls">
+      <button class="btn btn-primary" onclick="procesarExcelUpdate()" style="width: 250px;">🔄 Actualizar Base de Datos</button>
+    </div>
+    <div id="resMod2" style="margin-top: 20px; font-weight: 600;"></div>
+    <button id="btnDescargarReporte" class="btn btn-secondary" onclick="generarReporteExcel()" style="display:none; margin-top: 15px;">📥 Descargar Reporte de Resultados</button>
   </div>
 
 </div>
 
-<!-- SCRIPT DE LOGICA -->
+<!-- ================= MODAL GLOBAL ================= -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3 id="modalTitle">Confirmar Acción</h3>
+    <div id="modalLoader" class="loader-spinner"></div>
+    <p id="modalMessage">Procesando solicitud...</p>
+    
+    <div class="modal-buttons" id="modalButtons" style="display:none;">
+      <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn" id="btnAceptarModal" onclick="ejecutarSincronizacion()">Aceptar y Enviar</button>
+    </div>
+  </div>
+</div>
+
 <script>
   // =========================================================================
   // 🔴 AQUÍ VA LA URL DEL DEPLOY DE TU GOOGLE APPS SCRIPT
   // =========================================================================
-  const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbytEY6RgiKHt2NNgXdCb3HlssSVWThGhsEeJSOiBMAtl_3VRaTdcUBLAOn3mZGjbuYJaQ/exec';
+  const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbwf5aAQ06AJjO-I191drD8kygukhTNeuy1iYVHRiI859upsk9d2Mum-rX1Jj8CWmlPrfw/exec';
 
-  let bloqueActual = []; 
+  let bloqueActualManual = []; 
+  let bloqueActualExcel = [];
   let reporteMasivoGenerado = []; 
-  let filaSiguienteGlobal = 0;
+  let tipoSincronizacionActiva = null; // 'manual' o 'excel_nuevos'
+  let updatesMasivosTemp = [];
 
-  // UTILIDAD: Función unificada para conectarse al backend (Apps Script)
+  // UTILIDAD: Petición HTTP al backend
   async function llamarBackend(accion, payload = null) {
     try {
       const response = await fetch(URL_BACKEND_GAS, {
         method: 'POST',
-        // text/plain es OBLIGATORIO para evitar bloqueos CORS con Google Apps Script
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ accion: accion, payload: payload })
       });
@@ -153,45 +247,112 @@
     }
   }
 
-  // Fuerza mayúsculas en el front
+  // Fuerza mayúsculas en las entradas
   document.addEventListener('input', function(e) {
     if(e.target.tagName === 'INPUT' && e.target.type === 'text') {
       e.target.value = e.target.value.toUpperCase();
     }
   });
 
-  // Pestañas
+  // Cambiar pestañas
   function cambiarModulo(id) {
     document.querySelectorAll('.modulo').forEach(m => m.classList.remove('activo'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
     document.getElementById(id).classList.add('activo');
     event.currentTarget.classList.add('activo');
-    
-    if(id.includes('modulo1')) consultarSiguienteFila();
   }
 
-  // Traer celda vacía de destino
-  async function consultarSiguienteFila() {
-    document.querySelectorAll('.aviso-fila').forEach(el => el.innerText = "Consultando en vivo la celda vacía...");
+  /* ==============================================================
+     LÓGICA DEL MODAL
+  ============================================================== */
+  function abrirModal(mensaje, cargando = true) {
+    document.getElementById('confirmModal').style.display = 'flex';
+    document.getElementById('modalTitle').innerText = 'Confirmar Acción';
+    document.getElementById('modalMessage').innerHTML = mensaje;
+    
+    if(cargando) {
+      document.getElementById('modalLoader').style.display = 'block';
+      document.getElementById('modalButtons').style.display = 'none';
+    } else {
+      document.getElementById('modalLoader').style.display = 'none';
+      document.getElementById('modalButtons').style.display = 'flex';
+    }
+  }
+
+  function cerrarModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    tipoSincronizacionActiva = null;
+  }
+
+  // Se activa al dar clic en sincronizar manual o excel nuevos
+  async function iniciarSincronizacion(tipo) {
+    tipoSincronizacionActiva = tipo;
+    let total = (tipo === 'manual') ? bloqueActualManual.length : bloqueActualExcel.length;
+    
+    if(total === 0) return alert("No hay datos para sincronizar.");
+
+    abrirModal(`Consultando disponibilidad en la base de datos...`, true);
+
     const res = await llamarBackend('obtenerSiguienteFila');
     
     if(res.exito) {
-      filaSiguienteGlobal = res.fila;
-      document.querySelectorAll('.aviso-fila').forEach(el => {
-        el.innerText = `🟢 Seguro: La información se vaciará a partir de la celda A${res.fila}. Nada será sobreescrito.`;
-      });
+      abrirModal(
+        `Se encontró espacio libre.<br>Se guardarán <strong>${total} registros</strong> a partir de la <strong>Fila ${res.fila}</strong>.<br><br>¿Deseas proceder?`, 
+        false
+      );
+    } else {
+      abrirModal(`<span style="color:red">Error: ${res.error}</span>`, false);
+      document.getElementById('modalButtons').style.display = 'none';
+      setTimeout(cerrarModal, 3000);
     }
   }
-  
-  window.onload = consultarSiguienteFila;
 
-  // ---- MÓDULO 1: FORMULARIO ----
+  // Se ejecuta si el usuario da clic en "Aceptar y Enviar"
+  async function ejecutarSincronizacion() {
+    abrirModal('Sincronizando datos... Por favor espera.', true);
+    document.getElementById('modalTitle').innerText = 'Sincronizando';
+
+    let payload = (tipoSincronizacionActiva === 'manual') ? bloqueActualManual : bloqueActualExcel;
+    
+    const res = await llamarBackend('registrarBloqueTarjetas', payload);
+    
+    if(res.exito) {
+      abrirModal(`<strong>¡Éxito!</strong><br>${res.mensaje}`, false);
+      document.getElementById('modalButtons').style.display = 'none';
+      
+      // Limpiezas
+      if(tipoSincronizacionActiva === 'manual') {
+        bloqueActualManual = [];
+        document.getElementById("tbodyBloque").innerHTML = "";
+        document.getElementById("tablaBloque").style.display = "none";
+        document.getElementById("btnSincronizarManual").style.display = "none";
+      } else {
+        bloqueActualExcel = [];
+        document.getElementById('archivoMod1').value = "";
+      }
+
+      setTimeout(cerrarModal, 2500);
+    } else {
+      abrirModal(`<span style="color:red">Error al guardar: ${res.error}</span>`, false);
+      document.getElementById('modalButtons').innerHTML = `<button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>`;
+      document.getElementById('modalButtons').style.display = 'flex';
+    }
+  }
+
+
+  /* ==============================================================
+     MÓDULO 1: FORMULARIO MANUAL
+  ============================================================== */
   function agregarAlBloque() {
     const n = document.getElementById("m1_nombre").value;
     const ap1 = document.getElementById("m1_ap1").value;
     const ap2 = document.getElementById("m1_ap2").value;
     const nombreCompleto = `${n} ${ap1} ${ap2}`.trim();
     
+    if(!document.getElementById("m1_folio").value || !n) {
+      return alert("El Folio y el Nombre son obligatorios.");
+    }
+
     const fechaActual = new Date().toLocaleDateString('es-MX');
     let obs = document.getElementById("m1_obs").value;
     obs = obs ? `${obs} - ${fechaActual}` : fechaActual;
@@ -216,60 +377,38 @@
     filaNueva[18] = document.getElementById("m1_estatus").value;
     filaNueva[19] = nombreCompleto;
 
-    bloqueActual.push(filaNueva);
+    bloqueActualManual.push(filaNueva);
 
     document.getElementById("tbodyBloque").innerHTML += `<tr>
       <td>${filaNueva[0]}</td><td>${filaNueva[5]}</td><td>${filaNueva[7]}</td>
-      <td>${filaNueva[19]}</td><td>${filaNueva[18]}</td>
+      <td>${filaNueva[19]}</td>
+      <td><span style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-size:11px;">${filaNueva[18]}</span></td>
     </tr>`;
     
     document.getElementById("tablaBloque").style.display = "table";
-    document.getElementById("btnEnviarBloque").style.display = "inline-block";
+    document.getElementById("btnSincronizarManual").style.display = "inline-flex";
+    
     document.querySelectorAll('#formularioNuevos input').forEach(inp => inp.value = "");
   }
 
-  async function enviarBloque() {
-    if(bloqueActual.length === 0) return;
-    if(!confirm(`Se enviará un bloque de ${bloqueActual.length} registros (Desde fila ${filaSiguienteGlobal}). ¿Continuar?`)) return;
-    
-    document.getElementById("loaderForm").style.display = "block";
-    document.getElementById("btnEnviarBloque").disabled = true;
 
-    const res = await llamarBackend('registrarBloqueTarjetas', bloqueActual);
-    
-    document.getElementById("loaderForm").style.display = "none";
-    document.getElementById("btnEnviarBloque").disabled = false;
-    
-    if(res.exito) {
-      alert("✅ " + res.mensaje);
-      bloqueActual = [];
-      document.getElementById("tbodyBloque").innerHTML = "";
-      document.getElementById("tablaBloque").style.display = "none";
-      document.getElementById("btnEnviarBloque").style.display = "none";
-      consultarSiguienteFila();
-    } else {
-      alert("❌ Error: " + res.error);
-    }
-  }
-
-  // ---- MÓDULO 1: EXCEL NUEVOS ----
+  /* ==============================================================
+     MÓDULO 1: EXCEL NUEVOS
+  ============================================================== */
   function procesarExcelNuevos() {
     const file = document.getElementById('archivoMod1').files[0];
     if(!file) return alert("Sube un archivo Excel primero.");
-    if(!confirm(`Se anexará a partir de la Fila ${filaSiguienteGlobal}. ¿Continuar?`)) return;
 
-    document.getElementById("loaderExcelNuevos").style.display = "block";
-    
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = function(e) {
       const data = new Uint8Array(e.target.result);
       const workbook = XLSX.read(data, {type: 'array'});
       const jsonArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
       
-      let bloqueExcel = [];
+      bloqueActualExcel = [];
       const fechaActual = new Date().toLocaleDateString('es-MX');
 
-      for(let i = 1; i < jsonArr.length; i++) { // Salta fila 0 (encabezados)
+      for(let i = 1; i < jsonArr.length; i++) {
         let row = jsonArr[i];
         if(!row[0]) continue; 
 
@@ -277,8 +416,8 @@
         let n = String(row[8]||"").toUpperCase();
         let ap1 = String(row[9]||"").toUpperCase();
         let ap2 = String(row[10]||"").toUpperCase();
-        
         let obsOrig = String(row[15]||"").toUpperCase();
+        
         fData[0] = String(row[0]||"").toUpperCase();
         fData[1] = String(row[1]||"").toUpperCase();
         fData[2] = String(row[2]||"").toUpperCase();
@@ -296,29 +435,31 @@
         fData[18]= String(row[18]||"").toUpperCase();
         fData[19]= `${n} ${ap1} ${ap2}`.trim();
 
-        bloqueExcel.push(fData);
+        bloqueActualExcel.push(fData);
       }
 
-      const res = await llamarBackend('registrarBloqueTarjetas', bloqueExcel);
-      document.getElementById("loaderExcelNuevos").style.display = "none";
-      
-      if(res.exito){
-        alert("✅ " + res.mensaje);
-        consultarSiguienteFila();
+      if(bloqueActualExcel.length > 0) {
+        // Dispara el flujo del modal
+        iniciarSincronizacion('excel_nuevos');
       } else {
-        alert("❌ Error: " + res.error);
+        alert("El archivo Excel no contenía datos válidos.");
       }
     };
     reader.readAsArrayBuffer(file);
   }
 
-  // ---- MÓDULO 2: ACTUALIZACIÓN ESTATUS ----
+
+  /* ==============================================================
+     MÓDULO 2: ACTUALIZACIÓN MASIVA
+  ============================================================== */
   function procesarExcelUpdate() {
     const file = document.getElementById('archivoMod2').files[0];
     if(!file) return alert("Sube un archivo Excel primero.");
 
-    document.getElementById("loaderMod2").style.display = "block";
+    // Este módulo no necesita confirmación de fila porque busca IDs existentes
+    abrirModal('Leyendo archivo y procesando actualizaciones masivas...<br>No cierres esta ventana.', true);
     document.getElementById("btnDescargarReporte").style.display = "none";
+    document.getElementById("resMod2").innerHTML = "";
     
     const reader = new FileReader();
     reader.onload = async function(e) {
@@ -337,19 +478,26 @@
         });
       }
 
+      // Enviar al Backend
       const res = await llamarBackend('procesarActualizacionMasiva', arrayUpdates);
-      document.getElementById("loaderMod2").style.display = "none";
       
       if(res.exito) {
-        alert(`✅ Sincronización Concluida.\nÉxitos: ${res.estadisticas.exitos}\nFallos: ${res.estadisticas.fallos}`);
+        abrirModal(`<strong>Actualización Finalizada</strong><br>
+                    <span style="color:green">✔ ${res.estadisticas.exitos} Actualizados</span><br>
+                    <span style="color:red">✖ ${res.estadisticas.fallos} No Encontrados</span>`, false);
+        
+        document.getElementById('modalButtons').innerHTML = `<button class="btn" onclick="cerrarModal()">Cerrar</button>`;
+        
         document.getElementById("resMod2").innerHTML = 
-          `Resultados: <span style="color:green">${res.estadisticas.exitos} Actualizados</span> | 
+          `Resumen: <span style="color:green">${res.estadisticas.exitos} Actualizados</span> | 
           <span style="color:red">${res.estadisticas.fallos} No Encontrados</span>`;
         
         reporteMasivoGenerado = res.reporte;
-        document.getElementById("btnDescargarReporte").style.display = "inline-block";
+        document.getElementById("btnDescargarReporte").style.display = "inline-flex";
+        document.getElementById('archivoMod2').value = "";
       } else {
-        alert("❌ Error: " + res.error);
+        abrirModal(`<span style="color:red">Error: ${res.error}</span>`, false);
+        document.getElementById('modalButtons').innerHTML = `<button class="btn" onclick="cerrarModal()">Cerrar</button>`;
       }
     };
     reader.readAsArrayBuffer(file);
