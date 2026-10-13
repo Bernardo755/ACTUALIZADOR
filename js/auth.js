@@ -67,7 +67,12 @@ async function iniciarSesionLocal() {
       body: JSON.stringify({ action: 'login', usuario: u, password: p, ip: 'N/A', ubicacion: 'App Actualizador' })
     });
     const r = await resp.json();
-    if (!r.exito) { msg.innerText = r.error || 'Credenciales incorrectas.'; return; }
+    if (!r.exito) {
+      msg.innerText = (r.error === 'Acción no válida.')
+        ? 'Configuración incorrecta: URL_SISTEMA_API (config.js) no apunta al backend del sistema PRINCIPAL.'
+        : (r.error || 'Credenciales incorrectas.');
+      return;
+    }
 
     const rol = String(r.rol || '').trim().toUpperCase();
     if (window.ACT_CONFIG.ROLES_PERMITIDOS_APP.indexOf(rol) === -1) {
