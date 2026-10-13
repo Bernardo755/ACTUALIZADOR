@@ -6,7 +6,7 @@
    ========================================================= */
 window.ACT_CONFIG = {
   // Backend de ESTA app (registrar tarjetas / actualizar estatus).
-  URL_BACKEND_GAS: 'https://script.google.com/macros/s/AKfycbwQ8uuKkmB0yG8ibhaZ_9Z2V3EtIMzVRAiJ3iiQ9EOX-V9gx_pwRWaUt094ZVqPBJZa/exec',
+  URL_BACKEND_GAS: 'https://script.google.com/macros/s/AKfycbzDUJegnSg8aXBenfktcRJjCe2CoOsJoB4hMW3Jd82NTyHqN9fzABn7IqmbFvujMesVow/exec',
 
   // API del sistema principal: solo se usa para iniciar sesión si la app se abre sin el sistema.
   URL_SISTEMA_API: 'https://script.google.com/macros/s/AKfycbxstQtPQg9lbYE-RrEpFSslvCzxiZaManHdEzHdfxAW6IC2kYIfgnLUwwViUvzk2ynWTg/exec',
