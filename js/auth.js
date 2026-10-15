@@ -5,7 +5,7 @@
    ========================================================= */
 const Auth = (function () {
   const $ = id => document.getElementById(id);
-  const LIMITE_MS = (window.APP_CONFIGACT.INACTIVIDAD_MIN || 15) * 60 * 1000;
+  const LIMITE_MS = (window.APP_CONFIG.INACTIVIDAD_MIN || 15) * 60 * 1000;
   const EVENTOS_ACTIVIDAD = ['mousemove', 'keydown', 'click', 'touchstart'];
   let timer = null;
 
