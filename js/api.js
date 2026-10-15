@@ -27,7 +27,7 @@ const Api = (function () {
       usuario = res.usuario || user;
     } else if (res && res.error === 'Acción no válida.') {
       // El backend de ESTA app siempre reconoce "login"; este mensaje solo lo da otro proyecto.
-      res.error = 'La URL del servidor (config.js) no corresponde al backend del actualizador.';
+      res.error = 'El servidor respondió con otra aplicación: no reconoce el login del actualizador. Revisa que el proyecto de Apps Script tenga el Code.gs del actualizador y que la implementación use la versión nueva.';
     }
     return res;
   }
