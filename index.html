@@ -3,85 +3,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>REGISTRO DE TAR Y ACTUALIZACIONES</title>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <!-- ================= ACCESO (cubre la app hasta validar la sesión) ================= -->
-  <div class="auth-overlay" id="authOverlay">
-    <div class="auth-card">
-      <div id="authVerificando">
-        <div class="loader-spinner"></div>
-        <p style="color:var(--text-muted); margin:0;">Verificando sesión...</p>
-      </div>
+<!-- ================= ACCESO ================= -->
+<div class="container login-card" id="vista-login">
+  <h2>Acceso</h2>
+  <p class="login-ayuda">Registro de tarjetas y actualizaciones. Solo usuarios con rol ADMIN o RESP.</p>
+  <form id="formLogin" class="login-form" autocomplete="off">
+    <div class="form-group"><label for="loginUsuario">Usuario</label><input type="text" id="loginUsuario" autocomplete="username"></div>
+    <div class="form-group"><label for="loginPassword">Contraseña</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
+    <button type="submit" class="btn btn-primary" id="btnLogin">Entrar</button>
+    <div class="msg-error" id="loginMensaje" role="alert"></div>
+  </form>
+</div>
 
-      <div id="authLogin" style="display:none;">
-        <h3>Acceso restringido</h3>
-        <p style="font-size:14px; color:var(--text-muted); margin-top:0;">Solo usuarios con rol ADMIN o RESP.</p>
-        <input type="text" id="authUsuario" placeholder="Usuario" autocomplete="username">
-        <input type="password" id="authPassword" placeholder="Contraseña" autocomplete="current-password">
-        <button class="btn btn-primary" id="btnAuthEntrar" onclick="iniciarSesionLocal()">Entrar</button>
-        <div class="auth-msg" id="authMsg"></div>
-      </div>
+<!-- ================= APLICACIÓN (visible solo con sesión) ================= -->
+<div class="container" id="vista-app" style="display:none;">
+  <div class="barra-sesion">
+    <span id="etiquetaSesion"></span>
+    <button type="button" class="btn btn-secondary btn-chico" id="btnSalir">Cerrar sesión</button>
+  </div>
 
-      <div id="authBloqueado" style="display:none;">
-        <h3>Acceso no disponible</h3>
-        <p id="authBloqueadoMsg" style="font-size:14px; color:var(--text-muted);"></p>
-        <button class="btn btn-secondary" onclick="iniciarAutenticacion()">Volver a intentar</button>
+  <h2>REGISTRO Y ACTUALIZACIONES</h2>
+
+  <!-- Navegación -->
+  <div class="tabs">
+    <button type="button" class="tab-btn activo" data-modulo="modulo1-form">📝 Registro de Tarjetas</button>
+    <button type="button" class="tab-btn" data-modulo="modulo1-excel">📊 Registro de tarjetas (Pegar desde Excel)</button>
+    <button type="button" class="tab-btn" data-modulo="modulo2">🔄 Actualizar Estatus (Pegar desde Excel)</button>
+  </div>
+
+  <!-- ================= MÓDULO 1: FORMULARIO ================= -->
+  <div id="modulo1-form" class="modulo activo">
+    <h3>Registro Manual de Tarjetas</h3>
+
+    <div class="form-grid" id="formularioNuevos">
+      <div class="form-group"><label>Folio</label><input type="text" id="m1_folio"></div>
+      <div class="form-group"><label>ID SARE</label><input type="text" id="m1_idSare"></div>
+      <div class="form-group"><label>Nombre SARE</label><input type="text" id="m1_nombreSare"></div>
+      <div class="form-group"><label>Municipio</label><input type="text" id="m1_municipio"></div>
+      <div class="form-group"><label>CCT</label><input type="text" id="m1_cct"></div>
+      <div class="form-group"><label>Nombre de la Escuela</label><input type="text" id="m1_escuela"></div>
+      <div class="form-group"><label>ID Becario o Familia</label><input type="text" id="m1_idFamilia"></div>
+      <div class="form-group"><label>Nombre(s)</label><input type="text" id="m1_nombre"></div>
+      <div class="form-group"><label>Primer Apellido</label><input type="text" id="m1_ap1"></div>
+      <div class="form-group"><label>Segundo Apellido</label><input type="text" id="m1_ap2"></div>
+      <div class="form-group"><label>Remesa</label><input type="text" id="m1_remesa"></div>
+      <div class="form-group">
+        <label>Programa</label>
+        <select id="m1_programa">
+          <option value="BASICA">BÁSICA</option>
+          <option value="BUEMS">BUEMS</option>
+          <option value="JEF">JEF</option>
+        </select>
       </div>
+      <div class="form-group"><label>Bloque</label><input type="text" id="m1_bloque"></div>
+      <div class="form-group">
+        <label>Observaciones</label>
+        <input type="text" id="m1_obs" list="opcionesObs">
+        <datalist id="opcionesObs">
+          <option value="RECIBIDA DE OTRO ESTADO"></option>
+          <option value="NUEVA REMESA RECIBIDA"></option>
+        </datalist>
+      </div>
+      <div class="form-group"><label>Mes de Remesa</label><input type="text" id="m1_mes"></div>
+      <div class="form-group"><label>CURP</label><input type="text" id="m1_curp" maxlength="18"></div>
+      <div class="form-group">
+        <label>Estatus</label>
+        <select id="m1_estatus">
+          <option value="PERTENECE A LA SARE 1301">PERTENECE A LA SARE 1301</option>
+          <option value="PERTENECE A LA SARE 1302">PERTENECE A LA SARE 1302</option>
+          <option value="PERTENECE A LA SARE 1303">PERTENECE A LA SARE 1303</option>
+          <option value="PERTENECE A LA SARE 1304">PERTENECE A LA SARE 1304</option>
+          <option value="PERTENECE A LA SARE 1305">PERTENECE A LA SARE 1305</option>
+          <option value="PERTENECE A LA SARE 1306">PERTENECE A LA SARE 1306</option>
+          <option value="PERTENECE A LA SARE 1307">PERTENECE A LA SARE 1307</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" class="btn btn-secondary" id="btnAgregarManual">➕ Agregar a la Lista</button>
+      <button type="button" class="btn btn-primary" id="btnSincronizarManual" style="display:none;">☁️ Sincronizar Registros</button>
+    </div>
+
+    <div class="tabla-scroll">
+      <table id="tablaBloque" style="display:none;">
+        <thead>
+          <tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo</th><th>Estatus</th></tr>
+        </thead>
+        <tbody id="tbodyBloque"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- ================= APP: los módulos inyectan aquí su pestaña y su panel ================= -->
-  <div class="container" id="appContainer" style="display:none;">
-    <h2>REGISTRO Y ACTUALIZACIONES</h2>
-    <div class="tabs" id="tabs"></div>
-    <div id="modulos"></div>
-  </div>
-
-  <!-- ================= MODAL GLOBAL ================= -->
-  <div class="modal-overlay" id="confirmModal">
-    <div class="modal">
-      <h3 id="modalTitle">Confirmar Acción</h3>
-      <div id="modalLoader" class="loader-spinner"></div>
-      <p id="modalMessage">Procesando solicitud...</p>
-
-      <!-- Contraseña obligatoria antes de escribir en la base -->
-      <div class="modal-password" id="modalPasswordBox" style="display:none;">
-        <label for="modalPassword">Confirma tu contraseña para continuar</label>
-        <input type="password" id="modalPassword" placeholder="Contraseña" autocomplete="current-password">
-        <div class="err" id="modalPasswordError"></div>
-      </div>
-
-      <div class="modal-buttons" id="modalButtonsConfirm" style="display:none;">
-        <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
-        <button class="btn" id="btnAceptarModal" onclick="ejecutarSincronizacion()">Aceptar y Enviar</button>
-      </div>
-      <div class="modal-buttons" id="modalButtonsClose" style="display:none;">
-        <button class="btn btn-secondary" onclick="cerrarModal()">Cerrar</button>
-      </div>
+  <!-- ================= MÓDULO 1: PEGADO NUEVOS ================= -->
+  <div id="modulo1-excel" class="modulo">
+    <h3>Alta Masiva de Tarjetas Nuevas</h3>
+    <div class="paste-zone" id="pasteZoneMod1">
+      <div class="header-guide" id="guideMod1"></div>
+      <textarea id="pasteMod1" class="paste-input" placeholder="Selecciona y copia (Ctrl+C) el rango de celdas en Excel, en el mismo orden de columnas de la guía de arriba, y pégalo aquí (Ctrl+V). Puedes incluir o no la fila de encabezado."></textarea>
+      <div class="paste-count" id="conteoMod1">0 fila(s) detectada(s)</div>
+      <div class="paste-hint">Orden de columnas esperado: FOLIO, ID SARE, NOMBRE SARE, MUNICIPIO, CCT, ESCUELA, ID FAMILIA, NOMBRE(S), APELLIDO 1, APELLIDO 2, REMESA, PROGRAMA, BLOQUE, OBSERVACIONES, MES REMESA, CURP, ESTATUS.</div>
+    </div>
+    <div class="file-actions">
+      <button type="button" class="btn btn-primary" id="btnProcesarNuevos" style="width: 260px;">📤 Procesar y Sincronizar</button>
     </div>
   </div>
 
-  <!-- Orden de carga: configuración -> utilidades -> núcleo -> módulos -> arranque -->
-  <script src="config.js"></script>
+  <!-- ================= MÓDULO 2: ACTUALIZACIÓN ================= -->
+  <div id="modulo2" class="modulo">
+    <h3>Actualización Masiva de Estatus</h3>
+    <div class="paste-zone" id="pasteZoneMod2">
+      <div class="header-guide" id="guideMod2"></div>
+      <textarea id="pasteMod2" class="paste-input" placeholder="Copia (Ctrl+C) las columnas FOLIO, ESTATUS y OBSERVACIONES desde Excel y pégalas aquí (Ctrl+V). Puedes incluir o no la fila de encabezado."></textarea>
+      <div class="paste-count" id="conteoMod2">0 fila(s) detectada(s)</div>
+      <div class="paste-hint">Orden de columnas esperado: FOLIO, ESTATUS, OBSERVACIONES.</div>
+    </div>
+    <div class="file-actions">
+      <button type="button" class="btn btn-primary" id="btnActualizar" style="width: 260px;">🔄 Actualizar Base de Datos</button>
+    </div>
+    <div id="resMod2" style="margin-top: 20px; font-weight: 600;"></div>
+    <button type="button" id="btnDescargarReporte" class="btn btn-secondary" style="display:none; margin-top: 15px;">📥 Descargar Reporte de Resultados</button>
+  </div>
 
-  <script src="js/utils.js"></script>
-  <script src="js/modulos.js"></script>
-  <script src="js/modal.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/api.js"></script>
-  <script src="js/registro-bloque.js"></script>
+</div>
 
-  <script src="modules/mod-registro-manual.js"></script>
-  <script src="modules/mod-registro-excel.js"></script>
-  <script src="modules/mod-actualizar-estatus.js"></script>
+<!-- ================= MODAL GLOBAL ================= -->
+<div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <h3 id="modalTitle">Confirmar acción</h3>
+    <div id="modalLoader" class="loader-spinner"></div>
+    <p id="modalMessage"></p>
+    <div class="pass-box" id="modalPassBox" style="display:none;">
+      <input type="password" id="modalPass" autocomplete="current-password" placeholder="Contraseña" aria-label="Contraseña">
+      <div class="msg-error" id="modalPassError" role="alert"></div>
+    </div>
+    <div class="modal-buttons" id="modalButtons" style="display:none;"></div>
+  </div>
+</div>
 
-  <script src="js/app.js"></script>
+<script src="config.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/api.js"></script>
+<script src="js/mod-alta.js"></script>
+<script src="js/mod-actualizacion.js"></script>
+<script src="js/auth.js"></script>
 
 </body>
 </html>
