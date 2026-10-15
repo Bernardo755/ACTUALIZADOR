@@ -9,7 +9,7 @@ const Api = (function () {
 
   async function post(cuerpo) {
     try {
-      const r = await fetch(window.APP_CONFIG.URL_BACKEND, {
+      const r = await fetch(window.APP_CONFIGACT.URL_BACKEND, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(cuerpo)
