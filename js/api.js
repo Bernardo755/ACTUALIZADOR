@@ -25,6 +25,9 @@ const Api = (function () {
     if (res && res.exito && res.token) {
       token = res.token;
       usuario = res.usuario || user;
+    } else if (res && res.error === 'Acción no válida.') {
+      // El backend de ESTA app siempre reconoce "login"; este mensaje solo lo da otro proyecto.
+      res.error = 'La URL del servidor (config.js) no corresponde al backend del actualizador.';
     }
     return res;
   }
