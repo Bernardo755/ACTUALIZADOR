@@ -1,5 +1,5 @@
 /* MÓDULO 3 — COMUNICACIÓN CON EL BACKEND Y SESIÓN (solo en memoria) */
-const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbyOiI4bDqFyz7iCtPjguyQpPyQuBBuuZtR03T0GLrFi9nNWqJZYf3ZgxX-bEoTn_wMtfA/exec';
+const URL_BACKEND_GAS = 'https://script.google.com/macros/s/AKfycbyE63llfkQ-aH_PJiQQQkfWVt73qU4_6p86vL7Uj_RRnvuXcjlxsqpnp1TZtIpKpJ0IrQ/exec';
 
 // El token vive solo en memoria: al recargar la página hay que iniciar sesión otra vez.
 const Sesion = { token: null, usuario: null, ip: 'N/A' };
