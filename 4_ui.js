@@ -31,7 +31,7 @@ function pintarGuia(id, enc) {
 
 // Mayúsculas mientras se escribe (el servidor las vuelve a forzar).
 document.addEventListener('input', e => {
-  if (e.target.tagName === 'INPUT' && e.target.type === 'text') e.target.value = e.target.value.toUpperCase();
+  if (e.target.tagName === 'INPUT' && e.target.type === 'text' && e.target.id !== 'lgUser') e.target.value = e.target.value.toUpperCase();
 });
 
 function cambiarModulo(id, btn) {
