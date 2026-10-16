@@ -1,160 +1,131 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="referrer" content="no-referrer">
-  <title>REGISTRO DE TAR Y ACTUALIZACIONES</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REGISTRO DE TAR Y ACTUALIZACIONES</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#002F2A;--primary-hover:#014a42;--secondary:#526b67;--secondary-hover:#3a4f4c;--success:#0d9488;--success-hover:#0f766e;--bg:#f2f6f5;--surface:#fff;--text:#0b201d;--muted:#526b67;--border:#d9e3e1;--r:12px}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);padding:20px;margin:0;line-height:1.5}
+.container{max-width:1000px;margin:0 auto;background:var(--surface);padding:30px;border-radius:var(--r);box-shadow:0 4px 6px -1px rgba(0,47,42,.1)}
+h2{margin:0 0 25px;color:var(--primary);font-weight:700;text-align:center}
+h3{font-size:1.25rem;font-weight:600;margin:0 0 20px;border-bottom:2px solid var(--border);padding-bottom:10px}
+.topbar{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:10px}
+.tabs{display:flex;gap:10px;margin-bottom:25px;overflow-x:auto}
+.tab-btn{padding:12px 20px;border:none;background:var(--bg);color:var(--muted);cursor:pointer;border-radius:8px;font-weight:600;font-size:14px;white-space:nowrap}
+.tab-btn:hover{background:#e2eceb}.tab-btn.activo{background:var(--primary);color:#fff}
+.modulo{display:none}.modulo.activo{display:block}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:25px}
+.form-group{display:flex;flex-direction:column}
+label{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--muted)}
+input,select,textarea{padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,47,42,.12)}
+.btn{padding:12px 20px;background:var(--success);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:hover{background:var(--success-hover)}.btn:disabled{background:#94a3b8;cursor:not-allowed}
+.btn-secondary{background:var(--secondary)}.btn-secondary:hover{background:var(--secondary-hover)}
+.btn-primary{background:var(--primary)}.btn-primary:hover{background:var(--primary-hover)}
+table{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px}
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:left}
+th{background:var(--bg);color:var(--muted);font-weight:600}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,20,18,.6);backdrop-filter:blur(2px);justify-content:center;align-items:center;z-index:1000}
+.modal{background:#fff;padding:32px;border-radius:16px;width:90%;max-width:400px;text-align:center}
+.modal h3{border:none;padding:0;margin-top:0}
+.modal p{font-size:15px;color:var(--muted);margin-bottom:20px}
+.modal input{width:100%;box-sizing:border-box;margin-bottom:20px}
+.modal-buttons{display:flex;gap:12px}.modal-buttons .btn{width:100%}
+.loader{border:3px solid #f3f3f3;border-top:3px solid var(--primary);border-radius:50%;width:32px;height:32px;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{color:#c0392b}.ok{color:#0d9488}
+.paste-zone{border:2px dashed var(--border);border-radius:10px;background:var(--bg);padding:16px}
+.paste-zone.con-datos{border-color:var(--success);background:#effaf8}
+.header-guide{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:12px;border-bottom:1px dashed var(--border)}
+.header-chip{flex:0 0 auto;background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:6px 10px;border-radius:6px;white-space:nowrap}
+.header-chip .idx{opacity:.7;margin-right:4px}
+textarea.paste-input{width:100%;box-sizing:border-box;min-height:160px;resize:vertical;font-family:Consolas,Menlo,monospace;font-size:12.5px;white-space:pre;overflow-x:auto}
+.paste-hint{font-size:12px;color:var(--muted);margin-top:8px}
+.paste-count{font-size:12px;font-weight:700;color:var(--primary);margin-top:6px}
+.login{display:flex;min-height:80vh;align-items:center;justify-content:center}
+.login .card{background:#fff;padding:32px;border-radius:16px;width:100%;max-width:360px;box-shadow:0 4px 6px -1px rgba(0,47,42,.1)}
+.login .form-group{margin-bottom:16px}.login .btn{width:100%}
+#lgMsg{min-height:20px;font-size:13px;margin-top:12px;text-align:center}
+</style>
 </head>
 <body>
 
-<!-- ================= ACCESO ================= -->
-<div class="container login-card" id="vista-login">
-  <h2>Acceso</h2>
-  <p class="login-ayuda">Registro de tarjetas y actualizaciones. Solo usuarios con rol ADMIN o RESP.</p>
-  <form id="formLogin" class="login-form" autocomplete="off">
-    <div class="form-group"><label for="loginUsuario">Usuario</label><input type="text" id="loginUsuario" autocomplete="username"></div>
-    <div class="form-group"><label for="loginPassword">Contraseña</label><input type="password" id="loginPassword" autocomplete="current-password"></div>
-    <button type="submit" class="btn btn-primary" id="btnLogin">Entrar</button>
-    <div class="msg-error" id="loginMensaje" role="alert"></div>
-  </form>
+<!-- LOGIN: lo único visible hasta validar usuario y contraseña en el servidor -->
+<div id="loginView" class="login">
+  <div class="card">
+    <h2>Acceso</h2>
+    <div class="form-group"><label>Usuario</label><input type="text" id="lgUser" autocomplete="off"></div>
+    <div class="form-group"><label>Contraseña</label><input type="password" id="lgPass" autocomplete="off"></div>
+    <button class="btn btn-primary" id="btnLogin" onclick="iniciarSesion()">Ingresar</button>
+    <div id="lgMsg" class="err"></div>
+  </div>
 </div>
 
-<!-- ================= APLICACIÓN (visible solo con sesión) ================= -->
-<div class="container" id="vista-app" style="display:none;">
-  <div class="barra-sesion">
-    <span id="etiquetaSesion"></span>
-    <button type="button" class="btn btn-secondary btn-chico" id="btnSalir">Cerrar sesión</button>
-  </div>
-
+<div id="appView" class="container" style="display:none">
+  <div class="topbar"><span id="lblUsuario"></span><button class="btn btn-secondary" style="padding:6px 14px" onclick="cerrarSesion()">Salir</button></div>
   <h2>REGISTRO Y ACTUALIZACIONES</h2>
 
-  <!-- Navegación -->
   <div class="tabs">
-    <button type="button" class="tab-btn activo" data-modulo="modulo1-form">📝 Registro de Tarjetas</button>
-    <button type="button" class="tab-btn" data-modulo="modulo1-excel">📊 Registro de tarjetas (Pegar desde Excel)</button>
-    <button type="button" class="tab-btn" data-modulo="modulo2">🔄 Actualizar Estatus (Pegar desde Excel)</button>
+    <button class="tab-btn activo" onclick="cambiarModulo('modulo1-form',this)">📝 Registro de Tarjetas</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo1-excel',this)">📊 Registro de tarjetas (Pegar desde Excel)</button>
+    <button class="tab-btn" onclick="cambiarModulo('modulo2',this)">🔄 Actualizar Estatus (Pegar desde Excel)</button>
   </div>
 
-  <!-- ================= MÓDULO 1: FORMULARIO ================= -->
   <div id="modulo1-form" class="modulo activo">
     <h3>Registro Manual de Tarjetas</h3>
-
-    <div class="form-grid" id="formularioNuevos">
-      <div class="form-group"><label>Folio</label><input type="text" id="m1_folio"></div>
-      <div class="form-group"><label>ID SARE</label><input type="text" id="m1_idSare"></div>
-      <div class="form-group"><label>Nombre SARE</label><input type="text" id="m1_nombreSare"></div>
-      <div class="form-group"><label>Municipio</label><input type="text" id="m1_municipio"></div>
-      <div class="form-group"><label>CCT</label><input type="text" id="m1_cct"></div>
-      <div class="form-group"><label>Nombre de la Escuela</label><input type="text" id="m1_escuela"></div>
-      <div class="form-group"><label>ID Becario o Familia</label><input type="text" id="m1_idFamilia"></div>
-      <div class="form-group"><label>Nombre(s)</label><input type="text" id="m1_nombre"></div>
-      <div class="form-group"><label>Primer Apellido</label><input type="text" id="m1_ap1"></div>
-      <div class="form-group"><label>Segundo Apellido</label><input type="text" id="m1_ap2"></div>
-      <div class="form-group"><label>Remesa</label><input type="text" id="m1_remesa"></div>
-      <div class="form-group">
-        <label>Programa</label>
-        <select id="m1_programa">
-          <option value="BASICA">BÁSICA</option>
-          <option value="BUEMS">BUEMS</option>
-          <option value="JEF">JEF</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Bloque</label><input type="text" id="m1_bloque"></div>
-      <div class="form-group">
-        <label>Observaciones</label>
-        <input type="text" id="m1_obs" list="opcionesObs">
-        <datalist id="opcionesObs">
-          <option value="RECIBIDA DE OTRO ESTADO"></option>
-          <option value="NUEVA REMESA RECIBIDA"></option>
-        </datalist>
-      </div>
-      <div class="form-group"><label>Mes de Remesa</label><input type="text" id="m1_mes"></div>
-      <div class="form-group"><label>CURP</label><input type="text" id="m1_curp" maxlength="18"></div>
-      <div class="form-group">
-        <label>Estatus</label>
-        <select id="m1_estatus">
-          <option value="PERTENECE A LA SARE 1301">PERTENECE A LA SARE 1301</option>
-          <option value="PERTENECE A LA SARE 1302">PERTENECE A LA SARE 1302</option>
-          <option value="PERTENECE A LA SARE 1303">PERTENECE A LA SARE 1303</option>
-          <option value="PERTENECE A LA SARE 1304">PERTENECE A LA SARE 1304</option>
-          <option value="PERTENECE A LA SARE 1305">PERTENECE A LA SARE 1305</option>
-          <option value="PERTENECE A LA SARE 1306">PERTENECE A LA SARE 1306</option>
-          <option value="PERTENECE A LA SARE 1307">PERTENECE A LA SARE 1307</option>
-        </select>
-      </div>
+    <div class="form-grid" id="formularioNuevos"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" onclick="agregarAlBloque()">➕ Agregar a la Lista</button>
+      <button class="btn btn-primary" id="btnSincronizarManual" onclick="enviarAlta('manual')" style="display:none">☁️ Sincronizar Registros</button>
     </div>
-
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <button type="button" class="btn btn-secondary" id="btnAgregarManual">➕ Agregar a la Lista</button>
-      <button type="button" class="btn btn-primary" id="btnSincronizarManual" style="display:none;">☁️ Sincronizar Registros</button>
-    </div>
-
-    <div class="tabla-scroll">
-      <table id="tablaBloque" style="display:none;">
-        <thead>
-          <tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo</th><th>Estatus</th></tr>
-        </thead>
-        <tbody id="tbodyBloque"></tbody>
-      </table>
-    </div>
+    <table id="tablaBloque" style="display:none">
+      <thead><tr><th>Folio</th><th>CCT</th><th>ID Familia</th><th>Nombre Completo</th><th>Estatus</th></tr></thead>
+      <tbody id="tbodyBloque"></tbody>
+    </table>
   </div>
 
-  <!-- ================= MÓDULO 1: PEGADO NUEVOS ================= -->
   <div id="modulo1-excel" class="modulo">
     <h3>Alta Masiva de Tarjetas Nuevas</h3>
-    <div class="paste-zone" id="pasteZoneMod1">
+    <div class="paste-zone" id="zonaMod1">
       <div class="header-guide" id="guideMod1"></div>
-      <textarea id="pasteMod1" class="paste-input" placeholder="Selecciona y copia (Ctrl+C) el rango de celdas en Excel, en el mismo orden de columnas de la guía de arriba, y pégalo aquí (Ctrl+V). Puedes incluir o no la fila de encabezado."></textarea>
+      <textarea id="pasteMod1" class="paste-input" placeholder="Copia (Ctrl+C) el rango en Excel, en el orden de la guía, y pégalo aquí (Ctrl+V). Puedes incluir o no el encabezado." oninput="contarFilas('pasteMod1','conteoMod1','zonaMod1')"></textarea>
       <div class="paste-count" id="conteoMod1">0 fila(s) detectada(s)</div>
-      <div class="paste-hint">Orden de columnas esperado: FOLIO, ID SARE, NOMBRE SARE, MUNICIPIO, CCT, ESCUELA, ID FAMILIA, NOMBRE(S), APELLIDO 1, APELLIDO 2, REMESA, PROGRAMA, BLOQUE, OBSERVACIONES, MES REMESA, CURP, ESTATUS.</div>
     </div>
-    <div class="file-actions">
-      <button type="button" class="btn btn-primary" id="btnProcesarNuevos" style="width: 260px;">📤 Procesar y Sincronizar</button>
-    </div>
+    <div style="margin-top:20px"><button class="btn btn-primary" onclick="enviarAlta('excel')">📤 Procesar y Sincronizar</button></div>
   </div>
 
-  <!-- ================= MÓDULO 2: ACTUALIZACIÓN ================= -->
   <div id="modulo2" class="modulo">
     <h3>Actualización Masiva de Estatus</h3>
-    <div class="paste-zone" id="pasteZoneMod2">
+    <div class="paste-zone" id="zonaMod2">
       <div class="header-guide" id="guideMod2"></div>
-      <textarea id="pasteMod2" class="paste-input" placeholder="Copia (Ctrl+C) las columnas FOLIO, ESTATUS y OBSERVACIONES desde Excel y pégalas aquí (Ctrl+V). Puedes incluir o no la fila de encabezado."></textarea>
+      <textarea id="pasteMod2" class="paste-input" placeholder="Copia las columnas FOLIO, ESTATUS y OBSERVACIONES desde Excel y pégalas aquí." oninput="contarFilas('pasteMod2','conteoMod2','zonaMod2')"></textarea>
       <div class="paste-count" id="conteoMod2">0 fila(s) detectada(s)</div>
-      <div class="paste-hint">Orden de columnas esperado: FOLIO, ESTATUS, OBSERVACIONES.</div>
     </div>
-    <div class="file-actions">
-      <button type="button" class="btn btn-primary" id="btnActualizar" style="width: 260px;">🔄 Actualizar Base de Datos</button>
-    </div>
-    <div id="resMod2" style="margin-top: 20px; font-weight: 600;"></div>
-    <button type="button" id="btnDescargarReporte" class="btn btn-secondary" style="display:none; margin-top: 15px;">📥 Descargar Reporte de Resultados</button>
+    <div style="margin-top:20px"><button class="btn btn-primary" onclick="enviarActualizacion()">🔄 Actualizar Base de Datos</button></div>
+    <div id="resMod2" style="margin-top:20px;font-weight:600"></div>
+    <button id="btnReporte" class="btn btn-secondary" onclick="descargarReporte()" style="display:none;margin-top:15px">📥 Descargar Reporte de Resultados</button>
   </div>
-
 </div>
 
-<!-- ================= MODAL GLOBAL ================= -->
-<div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="overlay" id="confirmModal">
   <div class="modal">
-    <h3 id="modalTitle">Confirmar acción</h3>
-    <div id="modalLoader" class="loader-spinner"></div>
+    <h3 id="modalTitle"></h3>
+    <div id="modalLoader" class="loader"></div>
     <p id="modalMessage"></p>
-    <div class="pass-box" id="modalPassBox" style="display:none;">
-      <input type="password" id="modalPass" autocomplete="current-password" placeholder="Contraseña" aria-label="Contraseña">
-      <div class="msg-error" id="modalPassError" role="alert"></div>
+    <input type="password" id="modalPass" placeholder="Tu contraseña" autocomplete="off">
+    <div class="modal-buttons" id="modalButtons">
+      <button class="btn btn-secondary" id="btnModalCancel"></button>
+      <button class="btn" id="btnModalOk">Confirmar y enviar</button>
     </div>
-    <div class="modal-buttons" id="modalButtons" style="display:none;"></div>
   </div>
 </div>
 
-<script src="config.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/api.js"></script>
-<script src="js/mod-alta.js"></script>
-<script src="js/mod-actualizacion.js"></script>
-<script src="js/auth.js"></script>
-
+<script src="3_api.js"></script>
+<script src="4_ui.js"></script>
+<script src="5_app.js"></script>
 </body>
 </html>
